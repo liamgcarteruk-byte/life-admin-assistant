@@ -1,6 +1,7 @@
 import { useAuth } from './AuthContext';
 import Dashboard from './Dashboard';
 import Login from './Login';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 import './App.css';
 
 function App() {
@@ -18,7 +19,12 @@ function App() {
   }
 
   // If user is logged in, show Dashboard. Otherwise show Login
-  return user ? <Dashboard /> : <Login />;
+  return (
+    <>
+      {user ? <Dashboard /> : <Login />}
+      <SpeedInsights />
+    </>
+  );
 }
 
 export default App;
