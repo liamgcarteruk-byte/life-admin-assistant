@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { RefreshCw, AlertCircle, CheckCircle2, Clock, Plus } from 'lucide-react';
+import { RefreshCw, AlertCircle, CheckCircle2, Clock, Plus, LogOut } from 'lucide-react';
+import { useAuth } from './AuthContext';
 
 const Dashboard = () => {
+  const { handleLogout } = useAuth();
+
   const [data, setData] = useState({
     tasks: [],
     subscriptions: [],
@@ -210,16 +213,25 @@ const API_BASE_URL = 'https://script.google.com/macros/s/AKfycbyQ5tZz5So4exAfPrU
             <h1 className="text-2xl font-bold text-gray-900">Life Admin</h1>
             <p className="text-sm text-gray-500">{getTodayDate()}</p>
           </div>
-          <button
-            onClick={handleRefresh}
-            disabled={isRefreshing}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-            title="Refresh"
-          >
-            <RefreshCw
-              className={`w-5 h-5 text-gray-600 ${isRefreshing ? 'animate-spin' : ''}`}
-            />
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              title="Refresh"
+            >
+              <RefreshCw
+                className={`w-5 h-5 text-gray-600 ${isRefreshing ? 'animate-spin' : ''}`}
+              />
+            </button>
+            <button
+              onClick={handleLogout}
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-600"
+              title="Logout"
+            >
+              <LogOut className="w-5 h-5" />
+            </button>
+          </div>
         </div>
       </div>
 
