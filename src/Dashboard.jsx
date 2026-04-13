@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { RefreshCw, AlertCircle, CheckCircle2, Clock, Plus, LogOut } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { RefreshCw, AlertCircle, CheckCircle2, Clock, Plus, LogOut, Mic, MicOff, Send, X } from 'lucide-react';
 import { useAuth } from './AuthContext';
 
 const Dashboard = () => {
@@ -29,6 +29,12 @@ const Dashboard = () => {
 
   // NEW: State for handling task completion
   const [completingTaskId, setCompletingTaskId] = useState(null);
+
+  // NEW: State for voice input (Session 1.5)
+  const [isListening, setIsListening] = useState(false);
+  const [voiceTranscript, setVoiceTranscript] = useState('');
+  const [voiceError, setVoiceError] = useState(null);
+  const recognitionRef = useRef(null);
 
 const API_BASE_URL = 'https://script.google.com/macros/s/AKfycbyQ5tZz5So4exAfPrUS_OjZ9Q7nBQOdMh7gAazqOtIW1lcq2OmzKRwWDGUeEOnYWSj1IQ/exec';
 
@@ -61,6 +67,108 @@ const API_BASE_URL = 'https://script.google.com/macros/s/AKfycbyQ5tZz5So4exAfPrU
   useEffect(() => {
     fetchData();
   }, []);
+
+  // NEW: Initialize Web Speech API (Session 1.5)
+  useEffect(() => {
+    // Check if the browser supports Web Speech API
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (SpeechRecognition) {
+      recognitionRef.current = new SpeechRecognition();
+
+      // When speech is recognized, update the transcript
+      recognitionRef.current.onresult = (event) => {
+        let transcript = '';
+        // Loop through the recognized results
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          transcript += event.results[i][0].transcript;
+        }
+        setVoiceTranscript(transcript);
+      };
+
+      // Handle errors
+      recognitionRef.current.onerror = (event) => {
+        setVoiceError(`Microphone error: ${event.error}`);
+      };
+
+      // When recognition ends, stop the listening state
+      recognitionRef.current.onend = () => {
+        setIsListening(false);
+      };
+    }
+  }, []);
+
+  // NEW: Handle microphone button press (Session 1.5)
+  const handleMicrophoneClick = () => {
+    if (!recognitionRef.current) {
+      setVoiceError('Web Speech API not supported in this browser');
+      return;
+    }
+
+    if (isListening) {
+      // Stop listening
+      recognitionRef.current.stop();
+      setIsListening(false);
+    } else {
+      // Start listening
+      setVoiceError(null);
+      setVoiceTranscript('');
+      setIsListening(true);
+      recognitionRef.current.start();
+    }
+  };
+
+  // NEW: Handle voice input confirmation (creates task from voice)
+  const handleVoiceTaskSubmit = async () => {
+    if (!voiceTranscript.trim()) {
+      setVoiceError('Please speak a task description');
+      return;
+    }
+
+    setIsCreatingTask(true);
+    try {
+      const response = await fetch('/api/add-task', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: voiceTranscript,
+          category: 'personal',
+          priority: 'medium',
+          due_date: '',
+          description: 'Created via voice input',
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create task');
+      }
+
+      const result = await response.json();
+      if (result.success) {
+        setVoiceTranscript('');
+        setVoiceError(null);
+        await fetchData();
+        alert('Task created from voice input!');
+      }
+    } catch (err) {
+      console.error('Error creating voice task:', err);
+      setVoiceError('Failed to create task. Please try again.');
+    } finally {
+      setIsCreatingTask(false);
+    }
+  };
+
+  // NEW: Cancel voice input
+  const handleVoiceClear = () => {
+    if (isListening) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+    }
+    setVoiceTranscript('');
+    setVoiceError(null);
+  };
 
   // NEW: MARK TASK COMPLETE
   const handleCompleteTask = async (task) => {
@@ -237,16 +345,95 @@ const API_BASE_URL = 'https://script.google.com/macros/s/AKfycbyQ5tZz5So4exAfPrU
 
       <div className="max-w-2xl mx-auto px-4 py-6">
 
+        {/* NEW: Voice Input Section (Session 1.5) */}
+        {voiceTranscript || isListening || voiceError ? (
+          <div className="mb-6 bg-white rounded-lg p-4 border border-blue-200 shadow-sm">
+            <h3 className="font-bold text-gray-900 mb-4">Voice Input</h3>
+
+            {voiceError && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+                <p className="text-sm text-red-700">{voiceError}</p>
+              </div>
+            )}
+
+            <div className="mb-4 flex justify-center">
+              <button
+                onClick={handleMicrophoneClick}
+                className={`p-4 rounded-full transition-all ${
+                  isListening
+                    ? 'bg-red-500 hover:bg-red-600 shadow-lg scale-110'
+                    : 'bg-blue-500 hover:bg-blue-600'
+                } text-white`}
+                title={isListening ? 'Stop recording' : 'Start recording'}
+              >
+                {isListening ? (
+                  <Mic className="w-6 h-6 animate-pulse" />
+                ) : (
+                  <MicOff className="w-6 h-6" />
+                )}
+              </button>
+            </div>
+
+            {isListening && (
+              <p className="text-center text-sm text-gray-500 mb-3 animate-pulse">
+                Listening... Speak now
+              </p>
+            )}
+
+            {voiceTranscript && (
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Your task:
+                </label>
+                <textarea
+                  value={voiceTranscript}
+                  onChange={(e) => setVoiceTranscript(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-20 resize-none"
+                  placeholder="Edit your transcribed task here..."
+                />
+                <p className="text-xs text-gray-400 mt-1">You can edit the text before confirming</p>
+              </div>
+            )}
+
+            <div className="flex gap-2">
+              <button
+                onClick={handleVoiceTaskSubmit}
+                disabled={isCreatingTask || !voiceTranscript.trim()}
+                className="flex-1 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 disabled:opacity-50 transition-colors font-medium flex items-center justify-center gap-2"
+              >
+                <Send className="w-4 h-4" />
+                {isCreatingTask ? 'Saving...' : 'Confirm & Save'}
+              </button>
+              <button
+                onClick={handleVoiceClear}
+                className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors font-medium flex items-center justify-center gap-2"
+              >
+                <X className="w-4 h-4" />
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : null}
+
         {/* NEW: Add Task Button and Form */}
         <div className="mb-6">
           {!showNewTaskForm ? (
-            <button
-              onClick={() => setShowNewTaskForm(true)}
-              className="w-full bg-blue-500 text-white px-4 py-3 rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center gap-2 font-medium"
-            >
-              <Plus className="w-5 h-5" />
-              Add New Task
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowNewTaskForm(true)}
+                className="flex-1 bg-blue-500 text-white px-4 py-3 rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center gap-2 font-medium"
+              >
+                <Plus className="w-5 h-5" />
+                Add New Task
+              </button>
+              <button
+                onClick={handleMicrophoneClick}
+                className="bg-blue-500 text-white px-4 py-3 rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center gap-2 font-medium"
+                title="Create task with voice input"
+              >
+                <Mic className="w-5 h-5" />
+              </button>
+            </div>
           ) : (
             <div className="bg-white rounded-lg p-4 border border-blue-200 shadow-sm mb-4">
               <form onSubmit={handleCreateTask}>
