@@ -263,14 +263,37 @@ C:\Users\liamc\life-admin-assistant\
 
 ### Apps Script Maintenance (NEW)
 
-- **Single Source of Truth:** `apps-script-main.js` in the local repo
-- **How to Update:**
-  1. Edit `apps-script-main.js` locally
-  2. Copy entire file contents
-  3. Paste into Google Apps Script editor (replace all)
-  4. Test in Apps Script console: `dailyEmailScan()`
-  5. Commit to GitHub: `git add apps-script-main.js && git commit -m "..."`
-- **Why:** Version control + automatic sync + easier to review changes
+**⚠️ IMPORTANT - Security: API Keys Not in Version Control**
+
+- **Local File (NOT COMMITTED):** `apps-script-main.js`
+  - Contains your actual Anthropic API key
+  - Added to `.gitignore` - never commits to GitHub
+  - Kept locally only for your use
+  
+- **Template (IN VERSION CONTROL):** `apps-script-main.template.js`
+  - Same code structure as `apps-script-main.js`
+  - API key replaced with placeholder: `"YOUR_ANTHROPIC_API_KEY_HERE"`
+  - Tracks code/logic changes in GitHub
+  - Used to onboard new sessions (copy template → add your key)
+
+**Workflow:**
+1. Edit `apps-script-main.js` locally (with your actual API key)
+2. When code changes are made, update `apps-script-main.template.js` with same changes (but placeholder for API key)
+3. Copy entire file contents of `apps-script-main.js`
+4. Paste into Google Apps Script editor (replace all)
+5. Test in Apps Script console: `dailyEmailScan()`
+6. Commit only `apps-script-main.template.js` to GitHub
+   ```bash
+   git add apps-script-main.template.js
+   git commit -m "docs: Update Apps Script - [describe changes]"
+   git push
+   ```
+
+**Why This Approach:**
+- ✅ Code/logic changes are version controlled
+- ✅ API key stays local and secure
+- ✅ Future sessions can use template + add their own key
+- ✅ Follows security best practices
 
 ### Phase 2.3 Test Results (April 13, 2026)
 
@@ -292,8 +315,9 @@ C:\Users\liamc\life-admin-assistant\
 2. **Test locally:** `npm run dev` (verify frontend works)
 3. **Check Config sheet:** Verify AUTOMATION_ENABLED = TRUE
 4. **Monitor ProcessingLog:** Check last run timestamp and cost
-5. **API Key changes:** Update Anthropic key in Apps Script immediately
+5. **API Key changes:** Update Anthropic key in `apps-script-main.js` immediately (NEVER commit to GitHub)
 6. **Update this file:** After ANY changes (APIs, features, fixes, credentials)
+7. **Template sync:** When updating Apps Script code, sync changes to `apps-script-main.template.js` (with placeholder API key)
 
 ---
 
@@ -332,6 +356,9 @@ git push
 ## 📞 Quick Checklist for New Sessions
 
 When starting a new session, verify:
+- [ ] **Apps Script Setup:** `apps-script-main.js` exists locally with your actual API key
+  - Copy from `apps-script-main.template.js` if missing
+  - Update API key: `const CLAUDE_API_KEY = "your-key-here"`
 - [ ] Google Sheet ID is `1YSyZiHBfINbvOfoeBEHMwC1Gt4M0E8JVUj9AKj8aDjg`
 - [ ] Anthropic API key is current (check if rotated since last session)
 - [ ] Config sheet has AUTOMATION_ENABLED = TRUE
@@ -340,6 +367,7 @@ When starting a new session, verify:
 - [ ] Vercel environment variables match Config sheet
 - [ ] ProcessingLog shows recent runs (check last run timestamp)
 - [ ] No budget alerts in email inbox
+- [ ] **IMPORTANT:** Never commit `apps-script-main.js` - only commit `apps-script-main.template.js`
 
 ## 🔒 Security Note
 
