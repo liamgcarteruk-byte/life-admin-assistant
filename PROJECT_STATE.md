@@ -1,0 +1,335 @@
+# Life Admin Assistant - Project State & Technical Reference
+
+**Last Updated:** 2026-04-13 (Documentation Setup Session)  
+**Status:** Active Development (Phase 2.3 - Troubleshooting Subscription Intelligence)  
+**Current Phase:** Phase 2: Email Intelligence Layer (Sessions 2.1-2.3)  
+**Documentation:** Complete closed-loop system now in place
+
+---
+
+## 🎯 Quick Reference
+
+### Active URLs & Credentials
+| Item | Value | Last Updated |
+|------|-------|--------------|
+| **Deployed App** | https://life-admin-assistant.vercel.app | Session 1.5 |
+| **Google Sheet ID** | `1YSyZiHBfINbvOfoeBEHMwC1Gt4M0E8JVUj9AKj8aDjg` | Session 2.3 (updated) |
+| **Apps Script API** | See Apps Script console - multiple functions | Session 2.3 |
+| **GitHub Repo** | Connected to `C:\Users\liamc\life-admin-assistant` | Session 1.2 |
+| **Vercel Project** | life-admin-assistant | Session 1.5 |
+
+### Environment Variables (in Vercel)
+- `VITE_GOOGLE_SHEET_ID`: `1WcTx3MTwY-tp3EL1ENBy0lXMQvs6UB-E`
+- `VITE_APPS_SCRIPT_API`: [URL from table above]
+
+---
+
+## 📁 Folder Structure
+
+```
+C:\Users\liamc\life-admin-assistant\
+├── src/
+│   ├── components/
+│   │   ├── Dashboard.jsx          (Main task list view)
+│   │   ├── AddTaskForm.jsx        (New task input)
+│   │   ├── VoiceInput.jsx         (Microphone button)
+│   │   └── ... (future: Subscriptions, Emails, History)
+│   ├── pages/
+│   │   └── App.jsx                (Main router)
+│   ├── api/
+│   │   ├── addTask.js             (Serverless function)
+│   │   └── completeTask.js        (Serverless function)
+│   └── App.css
+├── public/
+├── vite.config.js
+├── package.json
+├── PROJECT_STATE.md               (THIS FILE - Source of truth)
+├── CLAUDE.md                      (User preferences & session template)
+└── .github/
+    └── workflows/                 (Vercel auto-deploy triggers)
+```
+
+---
+
+## ✅ Feature Status
+
+### Phase 1: Core Features ✅ COMPLETE
+- [x] Google OAuth login & authentication
+- [x] Dashboard with task list (real-time sync with Google Sheets)
+- [x] Task management (add, edit, complete, mark as done)
+- [x] Voice capture (microphone button + iOS Shortcut with back-tap)
+- [x] Mobile responsive design
+- [x] Pull-to-refresh functionality
+
+### Phase 2.1: Email Scanner Foundation ✅ COMPLETE
+- [x] Gmail integration (GmailApp API)
+- [x] Email extraction (45+ emails per run)
+- [x] Claude Haiku analysis (classification, subscription detection)
+- [x] Auto-task creation for action items
+- [x] ProcessingLog with cost tracking (~£0.0008/email)
+- [x] Error handling for JSON parsing
+
+### Phase 2.2: Scheduled Automation & Cost Controls ✅ COMPLETE
+- [x] Daily 7:00 AM time-based trigger (automatic email scan)
+- [x] Daily token budget: 50,000 tokens/day
+- [x] Weekly cost limit: £2.00/week
+- [x] Budget threshold enforcement
+- [x] Email alerts on budget exceeded
+- [x] Config sheet with settings
+
+### Phase 2.3: Subscription Intelligence 🔄 IN PROGRESS (Troubleshooting)
+- [x] Smart deduplication by sender email
+- [x] Context-aware subscription detection (not just renewals)
+- [x] Subscription renewal alerts (14-day window)
+- [ ] **DEBUGGING:** JSON parsing issues in execution
+- [ ] **TESTING:** Verify renewal alerts create "[RENEWAL]" tasks correctly
+
+### Phase 2.4: Learning System ⏳ NOT YET STARTED
+- [ ] Custom rules (ignore senders, auto-flag patterns)
+- [ ] Ignored emails review interface
+- [ ] System learns from user corrections
+
+---
+
+## 🔧 Technical Stack
+
+| Layer | Technology | Notes |
+|-------|-----------|-------|
+| **Frontend** | React (Vite) | Client-side UI |
+| **Styling** | Tailwind CSS | Responsive design |
+| **Hosting** | Vercel | Auto-deploys from GitHub |
+| **Backend** | Google Apps Script | Custom API endpoint |
+| **Database** | Google Sheets | `1WcTx3MTwY-tp3EL1ENBy0lXMQvs6UB-E` |
+| **Auth** | Google OAuth | Secure user login |
+| **API Routes** | Vercel Serverless | `/api/add-task`, `/api/complete-task` |
+
+---
+
+## 📊 Google Sheets Structure
+
+**Sheet ID:** `1YSyZiHBfINbvOfoeBEHMwC1Gt4M0E8JVUj9AKj8aDjg`  
+**Sheet Name:** Life Admin DB
+
+| Tab | Purpose | Status |
+|-----|---------|--------|
+| **Tasks** | Main task list (todo, completed) | Active |
+| **Subscriptions** | Tracked subscriptions with renewal dates | Active (Phase 2.3) |
+| **FlaggedEmails** | Important emails flagged by Claude | Active (Phase 2.1) |
+| **ProcessingLog** | Email scan runs, costs, tokens used | Active (tracking) |
+| **Config** | Automation settings & feature flags | Active (controls Phase 2) |
+| **IgnoredEmails** | Senders to skip in automation | Active (Phase 2.3) |
+| **Rules** | Custom rules for email classification | Planned (Phase 2.4) |
+
+---
+
+## 🔐 Apps Script Functions (Phase 2 Implementation)
+
+| Function | Purpose | Trigger |
+|----------|---------|---------|
+| `dailyEmailScan()` | Main automated run | Time-based (7:00 AM daily) |
+| `extractEmailsSinceLastRun()` | Fetch new Gmail | Called by dailyEmailScan |
+| `analyzeEmailBatchWithClaude()` | Claude analysis | Called by dailyEmailScan |
+| `processEmailBatch()` | Create tasks & subscriptions | Called by dailyEmailScan |
+| `handleSubscriptionEmail()` | Process subscription detection | Called by processEmailBatch |
+| `findSubscriptionByEmail()` | Deduplication lookup | Called by handleSubscriptionEmail |
+| `updateSubscription()` | Update existing subscription | Called by handleSubscriptionEmail |
+| `createPendingSubscription()` | Create new pending entry | Called by handleSubscriptionEmail |
+| `checkSubscriptionRenewals()` | Create renewal alerts | Called by processEmailBatch |
+| `logProcessingRun()` | Track costs & tokens | Called by dailyEmailScan |
+
+---
+
+## 📋 Key Technical Decisions
+
+### Why Google Sheets + Apps Script?
+- **No database to manage** - Google Sheets handles storage
+- **Built-in permissions** - Google OAuth provides security
+- **Easy to view/edit** - Can manually check data in Sheets
+- **Scalable** - Works fine for personal use
+
+### Why Vercel?
+- **Auto-deploys** from GitHub on every push
+- **Serverless functions** for backend API
+- **Free tier** is sufficient
+- **Fast global CDN**
+
+### Why React + Vite?
+- **Fast dev experience** - Hot module reloading
+- **Component-based** - Easy to build new views
+- **Tailwind** - Quick UI styling without custom CSS
+
+---
+
+## 🔗 Integration Points
+
+### Google Apps Script → Google Sheets
+- **What it does:** Receives POST requests from the web app
+- **Location:** Google Drive → Apps Script (managed separately)
+- **API Endpoint:** See "Quick Reference" table
+- **Last Modified:** Session 1.3
+
+### Vercel → GitHub
+- **Auto-deploy trigger:** Every commit to main branch
+- **Build command:** `npm run build`
+- **Deploy command:** `npm run preview`
+- **Deployment time:** ~2 minutes
+
+### React App → Google Apps Script
+- **Endpoint:** Uses `VITE_APPS_SCRIPT_API` environment variable
+- **Method:** POST requests with task data
+- **Auth:** Google OAuth token from login
+- **Example route:** `/api/add-task`
+
+---
+
+## 📝 Session History
+
+### Phase 1 Sessions (Completed)
+- **Session 1.1:** React + GitHub + Vercel setup
+- **Session 1.2:** Google Sheets database + Apps Script endpoints
+- **Session 1.3:** Frontend dashboard + task management
+- **Session 1.4:** Google OAuth authentication
+- **Session 1.5:** Voice input + iOS Shortcut integration
+- **Session 1.6:** Mobile-responsive UI polish
+
+### Phase 2 Sessions (Current)
+- **Session 2.1 (Completed):** Gmail integration + Claude analysis + email classification
+  - ✅ GmailApp.search() for email extraction
+  - ✅ Claude Haiku for context-aware analysis
+  - ✅ Auto-task creation + ProcessingLog cost tracking
+  - ✅ Robust JSON parsing for Claude responses
+
+- **Session 2.2 (Completed):** Scheduled automation + cost controls
+  - ✅ Daily 7:00 AM time-based trigger
+  - ✅ Daily token budget: 50,000 tokens/day
+  - ✅ Weekly cost limit: £2.00/week
+  - ✅ Budget enforcement + email alerts
+
+- **Session 2.3 (In Progress - Troubleshooting):** Subscription intelligence
+  - ✅ Smart deduplication by sender email
+  - ✅ Context-aware subscription detection
+  - ✅ Renewal alert system (14-day window)
+  - ⚠️ **CURRENT ISSUE:** JSON parsing in execution - needs debugging
+  - ⚠️ **NEXT STEP:** Test renewal alert task creation
+
+- **Documentation Setup Session (2026-04-13):**
+  - ✅ Created centralized PROJECT_STATE.md as single source of truth
+  - ✅ Restructured CLAUDE.md to contain only meta-instructions
+  - ✅ Set up explicit end-of-session update requirements
+  - ✅ Established closed-loop documentation system (read → work → update → commit)
+  - ✅ Memory system configured with startup/end checklists
+  - **Status:** Ready for next development session with zero information loss
+
+---
+
+## ⚠️ Important Technical Notes
+
+### Phase 2 Implementation Details
+
+1. **JSON Parsing with Claude:** Claude sometimes wraps JSON in markdown code blocks (```json...```). Use `indexOf('[')` and `lastIndexOf(']')` to extract valid JSON, don't rely on direct JSON.parse().
+
+2. **Email Deduplication:** Subscriptions matched by **sender email address**. First email from sender creates "pending_approval" entry; subsequent emails update existing record (prevents duplicates).
+
+3. **Budget Control System:** 
+   - Daily budget: 50,000 tokens/day
+   - Weekly limit: £2.00/week (200 pence)
+   - System checks weekly cost BEFORE processing
+   - Sends email alert if limit exceeded
+   - **Must update Config sheet if limits change**
+
+4. **Renewal Alert Window:** Checks for renewals 14 days before date. Prevents duplicate alerts by checking if "[RENEWAL]" task already exists for that subscription.
+
+5. **Email Extraction:** Uses `GmailApp.search()` with query syntax (e.g., `newer_than:1d`) instead of Gmail API (simpler, no Advanced Services needed).
+
+6. **Cost Per Run:** 
+   - ~£0.0008 per email analyzed
+   - 45 emails = ~£0.04 per run
+   - Daily (7am) = ~£0.28/day
+   - Well within £2.00/week budget
+
+### Current Session 2.3 Issues
+
+- **JSON Parsing in Execution:** Need to verify Claude response handling is working correctly in production
+- **Renewal Alert Testing:** Need to verify "[RENEWAL]" tasks are actually being created
+- **Deduplication Testing:** Need to confirm pending_approval entries work as expected
+
+---
+
+## ⚠️ Before Editing or Deploying
+
+1. **Check GitHub status:** `git status` (verify no uncommitted changes)
+2. **Test locally:** `npm run dev` (verify frontend works)
+3. **Check Config sheet:** Verify AUTOMATION_ENABLED = TRUE
+4. **Monitor ProcessingLog:** Check last run timestamp and cost
+5. **API Key changes:** Update Anthropic key in Apps Script immediately
+6. **Update this file:** After ANY changes (APIs, features, fixes, credentials)
+
+---
+
+## 🚀 How to Deploy
+
+```bash
+# 1. Make changes in VS Code
+# 2. Test locally
+npm run dev
+
+# 3. Commit and push
+git add .
+git commit -m "Your message"
+git push
+
+# 4. Vercel auto-deploys (watch https://vercel.com)
+# 5. Check live app: https://life-admin-assistant.vercel.app
+```
+
+---
+
+## 📞 Quick Checklist for New Sessions
+
+When starting a new session, verify:
+- [ ] Google Sheet ID is `1YSyZiHBfINbvOfoeBEHMwC1Gt4M0E8JVUj9AKj8aDjg`
+- [ ] Anthropic API key is current (check if rotated since last session)
+- [ ] Config sheet has AUTOMATION_ENABLED = TRUE
+- [ ] Daily trigger is still set to 7:00 AM
+- [ ] GitHub repo is synced (`git status`)
+- [ ] Vercel environment variables match Config sheet
+- [ ] ProcessingLog shows recent runs (check last run timestamp)
+- [ ] No budget alerts in email inbox
+
+## 🔒 Security Note
+
+⚠️ **API credentials are stored in:**
+- Anthropic API key: Google Apps Script (private)
+- Google OAuth: Vercel environment variables
+- Google Sheet credentials: Google Apps Script context
+
+Do NOT commit credentials to GitHub. If API key is exposed, rotate immediately and update Apps Script.
+
+---
+
+## 🔗 How This System Works
+
+### PROJECT_STATE.md (THIS FILE)
+- **Lives in:** `C:\Users\liamc\life-admin-assistant\PROJECT_STATE.md` (version controlled)
+- **Purpose:** Technical source of truth for IDs, credentials, architecture, status
+- **Updated when:** API keys change, features are added/debugged, phases complete
+- **Accessed by:** Claude at start of every session (I read this FIRST)
+
+### Project Memory File
+- **Lives in:** Persistent memory system (loaded automatically each session)
+- **Purpose:** Session-specific notes, progress details, troubleshooting logs
+- **Updated when:** Each session ends with what was learned/debugged
+- **Accessed by:** Complements PROJECT_STATE.md with context and decisions
+
+### How They Work Together
+1. **I start a new session** → Read PROJECT_STATE.md (technical details)
+2. **I need context** → Check project memory (what was done, what failed)
+3. **I make changes** → Update both files (this file + memory)
+4. **I commit** → Push PROJECT_STATE.md to GitHub
+5. **Next session** → Back to step 1 with latest technical state
+
+---
+
+**Last Maintained:** 2026-04-13  
+**Status:** Source of truth for Phase 2.3 (Subscription Intelligence - Troubleshooting)  
+**Next Update:** After Session 2.3 is fully debugged and tested
