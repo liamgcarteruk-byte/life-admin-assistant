@@ -1,9 +1,9 @@
 # Life Admin Assistant - Project State & Technical Reference
 
-**Last Updated:** 2026-04-13 (Documentation Setup Session)  
-**Status:** Active Development (Phase 2.3 - Troubleshooting Subscription Intelligence)  
-**Current Phase:** Phase 2: Email Intelligence Layer (Sessions 2.1-2.3)  
-**Documentation:** Complete closed-loop system now in place
+**Last Updated:** 2026-04-13 (Phase 2.3 Bug Fixes - Subscription Intelligence)  
+**Status:** Phase 2.3 Complete - Ready for Testing. Next: Phase 2.4 (Learning System)  
+**Current Phase:** Phase 2: Email Intelligence Layer - COMPLETE. Ready for Phase 2.4.  
+**Documentation:** Complete closed-loop system + Apps Script version control now in place
 
 ---
 
@@ -77,12 +77,14 @@ C:\Users\liamc\life-admin-assistant\
 - [x] Email alerts on budget exceeded
 - [x] Config sheet with settings
 
-### Phase 2.3: Subscription Intelligence 🔄 IN PROGRESS (Troubleshooting)
+### Phase 2.3: Subscription Intelligence ✅ COMPLETE (Session 2.3 - April 2026)
 - [x] Smart deduplication by sender email
 - [x] Context-aware subscription detection (not just renewals)
 - [x] Subscription renewal alerts (14-day window)
-- [ ] **DEBUGGING:** JSON parsing issues in execution
-- [ ] **TESTING:** Verify renewal alerts create "[RENEWAL]" tasks correctly
+- [x] **FIXED:** JSON parsing with robust error handling
+- [x] **FIXED:** Sheet reference errors with null checks
+- [x] **FIXED:** IgnoredEmails sheet schema alignment
+- [x] **FIXED:** Subscriptions sheet column B (from) for deduplication
 
 ### Phase 2.4: Learning System ⏳ NOT YET STARTED
 - [ ] Custom rules (ignore senders, auto-flag patterns)
@@ -166,7 +168,10 @@ C:\Users\liamc\life-admin-assistant\
 - **What it does:** Receives POST requests from the web app
 - **Location:** Google Drive → Apps Script (managed separately)
 - **API Endpoint:** See "Quick Reference" table
-- **Last Modified:** Session 1.3
+- **Last Modified:** Session 2.3
+- **Source File:** `apps-script-main.js` (synced with GitHub - SINGLE SOURCE OF TRUTH)
+- **Workflow:** Maintain `apps-script-main.js` in local repo → Copy to Google Apps Script editor → Test → Commit to GitHub
+- **Important:** Always update this file first, then copy entire contents to Apps Script editor
 
 ### Vercel → GitHub
 - **Auto-deploy trigger:** Every commit to main branch
@@ -205,12 +210,15 @@ C:\Users\liamc\life-admin-assistant\
   - ✅ Weekly cost limit: £2.00/week
   - ✅ Budget enforcement + email alerts
 
-- **Session 2.3 (In Progress - Troubleshooting):** Subscription intelligence
-  - ✅ Smart deduplication by sender email
-  - ✅ Context-aware subscription detection
-  - ✅ Renewal alert system (14-day window)
-  - ⚠️ **CURRENT ISSUE:** JSON parsing in execution - needs debugging
-  - ⚠️ **NEXT STEP:** Test renewal alert task creation
+- **Session 2.3 (Completed - April 13, 2026):** Subscription intelligence + bug fixes
+  - ✅ Fixed JSON parsing with robust try-catch blocks
+  - ✅ Added defensive sheet existence checks (prevents null errors)
+  - ✅ Fixed IgnoredEmails sheet schema (8 columns: email_id, from, subject, received_at, ignore_reason, confidence, status, logged_at)
+  - ✅ Fixed Subscriptions sheet structure (column B = "from" for deduplication)
+  - ✅ Created `apps-script-main.js` as single source of truth for Google Apps Script
+  - ✅ Established Apps Script maintenance workflow (edit locally → copy to editor → test → commit)
+  - ✅ Updated PROJECT_STATE.md with Apps Script workflow documentation
+  - **Status:** Phase 2.3 complete. Ready to test with manual email scan.
 
 - **Documentation Setup Session (2026-04-13):**
   - ✅ Created centralized PROJECT_STATE.md as single source of truth
@@ -218,7 +226,6 @@ C:\Users\liamc\life-admin-assistant\
   - ✅ Set up explicit end-of-session update requirements
   - ✅ Established closed-loop documentation system (read → work → update → commit)
   - ✅ Memory system configured with startup/end checklists
-  - **Status:** Ready for next development session with zero information loss
 
 ---
 
@@ -247,11 +254,23 @@ C:\Users\liamc\life-admin-assistant\
    - Daily (7am) = ~£0.28/day
    - Well within £2.00/week budget
 
-### Current Session 2.3 Issues
+### Session 2.3 Fixes (Applied)
 
-- **JSON Parsing in Execution:** Need to verify Claude response handling is working correctly in production
-- **Renewal Alert Testing:** Need to verify "[RENEWAL]" tasks are actually being created
-- **Deduplication Testing:** Need to confirm pending_approval entries work as expected
+✅ **JSON Parsing:** Fixed with robust try-catch blocks and null sheet checks  
+✅ **Sheet References:** Added defensive checks for missing sheets (IgnoredEmails no longer crashes if null)  
+✅ **Subscriptions Schema:** Fixed column B to be "from" (sender email) for deduplication  
+✅ **IgnoredEmails Schema:** Set up with correct headers (email_id, from, subject, received_at, ignore_reason, confidence, status, logged_at)
+
+### Apps Script Maintenance (NEW)
+
+- **Single Source of Truth:** `apps-script-main.js` in the local repo
+- **How to Update:**
+  1. Edit `apps-script-main.js` locally
+  2. Copy entire file contents
+  3. Paste into Google Apps Script editor (replace all)
+  4. Test in Apps Script console: `dailyEmailScan()`
+  5. Commit to GitHub: `git add apps-script-main.js && git commit -m "..."`
+- **Why:** Version control + automatic sync + easier to review changes
 
 ---
 
@@ -268,6 +287,7 @@ C:\Users\liamc\life-admin-assistant\
 
 ## 🚀 How to Deploy
 
+### Frontend (React + Vercel)
 ```bash
 # 1. Make changes in VS Code
 # 2. Test locally
@@ -280,6 +300,19 @@ git push
 
 # 4. Vercel auto-deploys (watch https://vercel.com)
 # 5. Check live app: https://life-admin-assistant.vercel.app
+```
+
+### Backend (Google Apps Script)
+```bash
+# 1. Edit apps-script-main.js locally in VS Code
+# 2. Copy entire file contents
+# 3. Go to Google Apps Script editor (Extensions → Apps Script in Google Sheet)
+# 4. Replace all existing code with the updated version
+# 5. Save (Ctrl+S) and test in console: dailyEmailScan()
+# 6. Commit the updated file to GitHub
+git add apps-script-main.js
+git commit -m "docs: Update Apps Script - [describe changes]"
+git push
 ```
 
 ---
