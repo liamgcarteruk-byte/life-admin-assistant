@@ -63,13 +63,13 @@ const API_BASE_URL = 'https://script.google.com/macros/s/AKfycbyQ5tZz5So4exAfPrU
   const handleCompleteTask = async (task) => {
     setCompletingTaskId(task.task_id);
     try {
-      const response = await fetch(API_BASE_URL, {
+      // Call the Vercel API route instead of Google Apps Script directly
+      const response = await fetch('/api/complete-task', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          action: 'complete_task',
           task_id: task.task_id,
         }),
       });
@@ -105,13 +105,13 @@ const API_BASE_URL = 'https://script.google.com/macros/s/AKfycbyQ5tZz5So4exAfPrU
 
     setIsCreatingTask(true);
     try {
-      const response = await fetch(API_BASE_URL, {
+      // Call the Vercel API route instead of Google Apps Script directly
+      const response = await fetch('/api/add-task', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          action: 'add_task',
           title: newTask.title,
           category: newTask.category,
           priority: newTask.priority,
