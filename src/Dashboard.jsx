@@ -27,7 +27,7 @@ const Dashboard = () => {
   // NEW: State for handling task completion
   const [completingTaskId, setCompletingTaskId] = useState(null);
 
-const API_BASE_URL = 'https://api.allorigins.win/raw?url=https://script.google.com/macros/s/AKfycbyQ5tZz5So4exAfPrUS_OjZ9Q7nBQOdMh7gAazqOtIW1lcq2OmzKRwWDGUeEOnYWSj1IQ/exec';
+const API_BASE_URL = 'https://script.google.com/macros/s/AKfycbyQ5tZz5So4exAfPrUS_OjZ9Q7nBQOdMh7gAazqOtIW1lcq2OmzKRwWDGUeEOnYWSj1IQ/exec';
 
   const fetchData = async () => {
     try {
