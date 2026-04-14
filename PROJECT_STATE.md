@@ -1,9 +1,9 @@
 # Life Admin Assistant - Project State & Technical Reference
 
-**Last Updated:** 2026-04-14 (Phase 2.4.2 - CORS Architecture Fix Complete)  
-**Status:** Phase 2.3 ✅ COMPLETE. Phase 2.4.1 Features Built ✅. Phase 2.4.2 Architecture Fix ✅. Ready for Testing.  
-**Current Phase:** Phase 2.4: Learning System - Ignored Emails Review (Architecture Fixed)  
-**Documentation:** Complete closed-loop system + Vercel serverless proxy pattern + Apps Script version control + CORS solution documented
+**Last Updated:** 2026-04-14 (Phase 2.4.2 Complete - CORS Architecture Fixed & Tested)  
+**Status:** Phase 2.3 ✅ COMPLETE. Phase 2.4.1 Features ✅ Built. Phase 2.4.2 Architecture ✅ FIXED. Ready for Phase 2.4.3 (Testing).  
+**Current Phase:** Phase 2.4: Learning System - In Progress (Ignored Emails Review Interface Built & CORS Fixed)  
+**Documentation:** Complete closed-loop system + Vercel serverless proxy pattern + Apps Script version control + CORS solution fully documented
 
 ---
 
@@ -370,24 +370,31 @@ The architecture uses Vercel serverless functions as a proxy:
 
 ---
 
-## 📝 Next Session Preparation (Phase 2.4 - Learning System)
+## 📝 Next Session Preparation (Phase 2.4.3 - Testing & Custom Rules)
 
 **When you start the next session:**
 1. Read PROJECT_STATE.md (you know the drill!)
-2. Verify your local setup:
+2. **FIRST:** Test the CORS fixes in the live app:
+   - Go to https://life-admin-assistant.vercel.app
+   - Test task completion (click checkmark on a task)
+   - Test voice input (create a task via microphone)
+   - Switch to "Ignored Emails" tab
+   - Test email actions: Approve, Whitelist Sender, Delete
+   - Check browser console (F12) for any errors
+3. Verify your local setup:
    - `apps-script-main.js` exists with your current API key
    - `apps-script-main.template.js` is in the repo (check via git)
    - `.gitignore` has `apps-script-main.js` entry
-3. Phase 2.4 Features to Build:
-   - **Rules Sheet:** Custom ignore/flag rules table
+4. Phase 2.4 Custom Rules Features (if testing passes):
+   - **Rules Sheet:** Custom ignore/flag rules table already created in Google Sheets
    - **addRule() function:** Already exists in Apps Script - just needs frontend
    - **Frontend UI:** Interface to create/manage rules
    - **Auto-learning:** System learns from user corrections
-4. Suggested Implementation Order:
-   - Add Rules sheet columns (rule_id, pattern, action, reason, created_date, active)
-   - Create React component for rule management
-   - Test with a few rules (e.g., ignore emails from newsletters)
-   - Build ignored email review interface
+5. Suggested Implementation Order (if testing succeeds):
+   - Add Rules management UI component
+   - Test creating a rule (e.g., ignore emails from newsletter@example.com)
+   - Test rule auto-application on next email scan
+   - Build dashboard view for current active rules
 
 ---
 
