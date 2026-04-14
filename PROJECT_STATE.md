@@ -1,9 +1,9 @@
 # Life Admin Assistant - Project State & Technical Reference
 
-**Last Updated:** 2026-04-13 (Phase 2.3 Complete - Session Wrapped)  
-**Status:** Phase 2.3 ✅ COMPLETE & TESTED. Phase 2.4 Ready to Start (Learning System)  
-**Current Phase:** Phase 2: Email Intelligence - COMPLETE. Next: Phase 2.4 (Custom Rules + Learning)  
-**Documentation:** Complete closed-loop system + Apps Script version control + API key security + tested in production
+**Last Updated:** 2026-04-14 (Phase 2.4.2 - CORS Architecture Fix Complete)  
+**Status:** Phase 2.3 ✅ COMPLETE. Phase 2.4.1 Features Built ✅. Phase 2.4.2 Architecture Fix ✅. Ready for Testing.  
+**Current Phase:** Phase 2.4: Learning System - Ignored Emails Review (Architecture Fixed)  
+**Documentation:** Complete closed-loop system + Vercel serverless proxy pattern + Apps Script version control + CORS solution documented
 
 ---
 
@@ -86,10 +86,10 @@ C:\Users\liamc\life-admin-assistant\
 - [x] **FIXED:** IgnoredEmails sheet schema alignment
 - [x] **FIXED:** Subscriptions sheet column B (from) for deduplication
 
-### Phase 2.4: Learning System ⏳ NOT YET STARTED
-- [ ] Custom rules (ignore senders, auto-flag patterns)
-- [ ] Ignored emails review interface
-- [ ] System learns from user corrections
+### Phase 2.4: Learning System 🔄 IN PROGRESS
+- [x] Ignored emails review interface (✅ Session 2.4.1 Complete)
+- [ ] Custom rules interface (Planned)
+- [ ] System learns from user corrections (Planned)
 
 ---
 
@@ -225,6 +225,27 @@ C:\Users\liamc\life-admin-assistant\
   - ✅ **TESTED:** Manual email scan ran successfully (16 emails processed, no crashes)
   - **Status:** Phase 2.3 COMPLETE. All systems working. Ready for Phase 2.4.
 
+- **Session 2.4.1 (Partial - April 14, 2026):** Ignored emails review interface + CORS diagnostics
+  - ✅ Built Ignored Emails tab in Dashboard with 27 email review interface
+  - ✅ Created Dashboard_Phase2.4.jsx versioned copy for file management
+  - ⚠️ Discovered task completion stopped working (regression after Phase 2.4 merge)
+  - ⚠️ Identified root cause: POST requests missing CORS proxy layer
+  - ⚠️ Dashboard was making direct requests to Google Apps Script instead of through Vercel serverless functions
+  - **Status:** Phase 2.4.1 features built but CORS issue blocked testing
+
+- **Session 2.4.2 (Current - April 14, 2026):** CORS Architecture Fix + Post Request Routing
+  - ✅ Diagnosed CORS issue: Browser blocks cross-origin POST requests without proper headers
+  - ✅ Identified existing Vercel serverless function pattern (add-task.js, complete-task.js)
+  - ✅ Created `manage-ignored-email.js` serverless function (was missing)
+  - ✅ Updated Dashboard.jsx to route all POST requests through `/api/` endpoints:
+    - `/api/add-task` for voice input + new tasks
+    - `/api/complete-task` for marking tasks done
+    - `/api/manage-ignored-email` for approve/whitelist/delete actions
+  - ✅ Created versioned Dashboard_Phase2.4.jsx copy
+  - ✅ Updated PROJECT_STATE.md with critical CORS architecture documentation
+  - ✅ Established rule: ALL POST requests must proxy through Vercel (never direct to Google Apps Script)
+  - **Status:** CORS issue fixed. Ready to test Phase 2.4 features.
+
 - **Documentation Setup Session (2026-04-13):**
   - ✅ Created centralized PROJECT_STATE.md as single source of truth
   - ✅ Restructured CLAUDE.md to contain only meta-instructions
@@ -235,6 +256,41 @@ C:\Users\liamc\life-admin-assistant\
 ---
 
 ## ⚠️ Important Technical Notes
+
+### 🚨 CRITICAL: Vercel Serverless Functions Must Proxy All POST Requests
+
+**THE RULE:** All POST requests from React frontend → must go through Vercel serverless functions, NEVER directly to Google Apps Script.
+
+**Why?** Browser CORS (Cross-Origin Resource Sharing) security:
+- When React (on Vercel) makes a POST request with `Content-Type: application/json` to Google Apps Script, the browser sends a CORS preflight request (OPTIONS) first
+- Google Apps Script doesn't return CORS headers, so the preflight fails
+- The browser blocks the actual POST request
+- Result: All POST requests fail with CORS 405 errors
+
+**Solution (Already Implemented):**
+The architecture uses Vercel serverless functions as a proxy:
+1. React frontend sends POST to `/api/add-task`, `/api/complete-task`, `/api/manage-ignored-email` (same Vercel domain)
+2. Browser allows this (same origin)
+3. Vercel function then makes the POST request to Google Apps Script from server-to-server (no CORS issues)
+4. Google Apps Script processes the request
+5. Response flows back through Vercel to React
+
+**Files in `/api/` folder:**
+- `add-task.js` - Creates new tasks (forwards to Google Apps Script)
+- `complete-task.js` - Marks tasks as done (forwards to Google Apps Script)
+- `manage-ignored-email.js` - Handles ignored email actions: approve, whitelist, delete (forwards to Google Apps Script)
+
+**How to Avoid This Bug in Future:**
+- ✅ DO: `await fetch('/api/add-task', {...})`
+- ❌ DON'T: `await fetch('https://script.google.com/macros/s/...', {...})`
+- When adding new POST actions, create a new serverless function in `/api/` folder
+- Copy the pattern from existing functions (they all follow the same structure)
+
+**Session 2.4.2 Fix (April 14, 2026):**
+- Created `manage-ignored-email.js` serverless function
+- Updated `Dashboard.jsx` to use `/api/add-task`, `/api/complete-task`, `/api/manage-ignored-email`
+- This fixed task completion regression and ignored email action buttons
+- Now all POST requests properly proxy through Vercel
 
 ### Phase 2 Implementation Details
 

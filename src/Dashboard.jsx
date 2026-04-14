@@ -131,11 +131,10 @@ const Dashboard = () => {
 
     setIsCreatingTask(true);
     try {
-      const response = await fetch(API_BASE_URL, {
+      const response = await fetch('/api/add-task', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          action: 'add_task',
           title: voiceTranscript,
           category: 'personal',
           priority: 'medium',
@@ -171,10 +170,10 @@ const Dashboard = () => {
   const handleCompleteTask = async (task) => {
     setCompletingTaskId(task.task_id);
     try {
-      const response = await fetch(API_BASE_URL, {
+      const response = await fetch('/api/complete-task', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'complete_task', task_id: task.task_id }),
+        body: JSON.stringify({ task_id: task.task_id }),
       });
 
       if (!response.ok) throw new Error('Failed to complete task');
@@ -242,12 +241,11 @@ const Dashboard = () => {
   const handleIgnoredEmailAction = async (emailId, sender, action) => {
     setProcessingEmailId(emailId);
     try {
-      const response = await fetch(API_BASE_URL, {
+      const response = await fetch('/api/manage-ignored-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          action: 'manage_ignored_email',
-          sub_action: action,
+          action,
           email_id: emailId,
           sender_email: sender,
           sender_name: sender?.split('@')[0],
