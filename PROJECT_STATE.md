@@ -1,9 +1,9 @@
 # Life Admin Assistant - Project State & Technical Reference
 
-**Last Updated:** 2026-04-13 (Phase 2.3 Testing Complete - All Systems Working)  
-**Status:** Phase 2.3 ✅ TESTED & VERIFIED. Ready for Phase 2.4 (Learning System)  
-**Current Phase:** Phase 2.3 Complete. Next Session: Phase 2.4 (Custom Rules + Learning)  
-**Documentation:** Complete closed-loop system + Apps Script version control + tested in production
+**Last Updated:** 2026-04-13 (Phase 2.3 Complete - Session Wrapped)  
+**Status:** Phase 2.3 ✅ COMPLETE & TESTED. Phase 2.4 Ready to Start (Learning System)  
+**Current Phase:** Phase 2: Email Intelligence - COMPLETE. Next: Phase 2.4 (Custom Rules + Learning)  
+**Documentation:** Complete closed-loop system + Apps Script version control + API key security + tested in production
 
 ---
 
@@ -210,7 +210,7 @@ C:\Users\liamc\life-admin-assistant\
   - ✅ Weekly cost limit: £2.00/week
   - ✅ Budget enforcement + email alerts
 
-- **Session 2.3 (Completed - April 13, 2026):** Subscription intelligence + bug fixes
+- **Session 2.3 (Completed - April 13, 2026):** Subscription intelligence + bug fixes + API security
   - ✅ Fixed JSON parsing with robust try-catch blocks
   - ✅ Added defensive sheet existence checks (prevents null errors)
   - ✅ Fixed IgnoredEmails sheet schema (8 columns: email_id, from, subject, received_at, ignore_reason, confidence, status, logged_at)
@@ -218,7 +218,12 @@ C:\Users\liamc\life-admin-assistant\
   - ✅ Created `apps-script-main.js` as single source of truth for Google Apps Script
   - ✅ Established Apps Script maintenance workflow (edit locally → copy to editor → test → commit)
   - ✅ Updated PROJECT_STATE.md with Apps Script workflow documentation
-  - **Status:** Phase 2.3 complete. Ready to test with manual email scan.
+  - ✅ Created `apps-script-main.template.js` for version control (secrets excluded)
+  - ✅ Added `.gitignore` entry for `apps-script-main.js`
+  - ✅ Updated CLAUDE.md with API key security documentation
+  - ✅ Rotated Anthropic API key for security
+  - ✅ **TESTED:** Manual email scan ran successfully (16 emails processed, no crashes)
+  - **Status:** Phase 2.3 COMPLETE. All systems working. Ready for Phase 2.4.
 
 - **Documentation Setup Session (2026-04-13):**
   - ✅ Created centralized PROJECT_STATE.md as single source of truth
@@ -306,6 +311,27 @@ C:\Users\liamc\life-admin-assistant\
 ⚠️ **Note:** User imported historic emails yesterday - many tasks are older emails. Expected behavior.
 
 **Next Session:** Phase 2.4 - Custom Rules (ignore senders, auto-flag patterns)
+
+---
+
+## 📝 Next Session Preparation (Phase 2.4 - Learning System)
+
+**When you start the next session:**
+1. Read PROJECT_STATE.md (you know the drill!)
+2. Verify your local setup:
+   - `apps-script-main.js` exists with your current API key
+   - `apps-script-main.template.js` is in the repo (check via git)
+   - `.gitignore` has `apps-script-main.js` entry
+3. Phase 2.4 Features to Build:
+   - **Rules Sheet:** Custom ignore/flag rules table
+   - **addRule() function:** Already exists in Apps Script - just needs frontend
+   - **Frontend UI:** Interface to create/manage rules
+   - **Auto-learning:** System learns from user corrections
+4. Suggested Implementation Order:
+   - Add Rules sheet columns (rule_id, pattern, action, reason, created_date, active)
+   - Create React component for rule management
+   - Test with a few rules (e.g., ignore emails from newsletters)
+   - Build ignored email review interface
 
 ---
 

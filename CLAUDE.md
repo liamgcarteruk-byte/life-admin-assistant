@@ -33,32 +33,35 @@ A personal life administration assistant that runs as:
 
 **At the beginning of each new session, I should:**
 
-1. **Read the project memory file** to understand current progress:
+1. **REQUEST ACCESS TO PROJECT FOLDER FIRST**
    ```
-   C:\Users\liamc\AppData\Roaming\Claude\local-agent-mode-sessions\1bebf69d-04b0-4863-a4b9-302e41453949\87cd65b1-ce1c-475b-b872-ded146e592ac\spaces\f5037511-40c1-4871-a5c2-281ffcf04e5a\memory\project_life_admin_assistant.md
+   C:\Users\liamc\life-admin-assistant
    ```
-   This file contains:
-   - What's been completed in each session
-   - What's currently working
-   - What's next
-   - Important technical notes
+   This must be done before reading any project files or making changes.
 
-2. **Understand the current state:**
-   - Which sessions are complete
-   - What features are working
-   - What the next session should focus on
-   - Any technical decisions made in previous sessions
+2. **READ PROJECT_STATE.md** (the source of truth):
+   - Location: `C:\Users\liamc\life-admin-assistant\PROJECT_STATE.md`
+   - Contains: All technical details, credentials, architecture, current status
+   - Always read this FIRST before doing any work
 
-3. **Apply these preferences:**
+3. **READ PROJECT MEMORY** for session-specific context:
+   - Location: Auto-loaded persistent memory
+   - Contains: Session progress, debugging notes, what works/what failed
+
+4. **Apply file management rules (Phase 2.4+):**
+   - **For .jsx files:** Create versioned copy (e.g., Dashboard_Phase2.4.jsx) AND auto-update main file (Dashboard.jsx)
+   - **For Apps Script:** Provide complete merged file for manual paste (cannot edit Google Apps Script directly)
+   - **For all changes:** Commit to GitHub immediately after
+
+5. **Apply communication preferences:**
    - User is beginner coder → explain everything
    - Provide step-by-step guidance
-   - Use visual references and screenshots when helpful
+   - Use visual references when helpful
    - Simplify complex concepts
-   - Avoid jargon without explanation
 
-4. **Skip these questions:**
+6. **Skip these questions:**
    - "Where is your project folder?" (It's `C:\Users\liamc\life-admin-assistant`)
-   - "What have you built so far?" (Check memory file)
+   - "What have you built so far?" (Check PROJECT_STATE.md)
    - "Which framework are you using?" (React + Tailwind + Vercel + Google Stack)
    - "How is your app deployed?" (Vercel auto-deploys from GitHub)
 
