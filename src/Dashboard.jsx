@@ -2,19 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { RefreshCw, AlertCircle, CheckCircle2, Clock, Plus, Mic, MicOff, Send, X } from 'lucide-react';
 import SendersTab from './SendersTab';
 
-const Dashboard = () => {
-  const [data, setData] = useState({
-    tasks: [],
-    subscriptions: [],
-    flaggedEmails: [],
-  });
-
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [lastUpdated, setLastUpdated] = useState(null);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-
-  // NEW: State for the task creation form
+const Dashboard = ({ data = {}, onRefresh, isRefreshing = false, lastUpdated = null }) => {
+  // Local state for UI interactions only (not data fetching)
   const [showNewTaskForm, setShowNewTaskForm] = useState(false);
   const [newTask, setNewTask] = useState({
     title: '',
@@ -37,37 +26,12 @@ const Dashboard = () => {
   // NEW: State for tab navigation (Phase 2.5)
   const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard' or 'senders'
 
-  const API_BASE_URL = 'https://script.google.com/macros/s/AKfycbyQ5tZz5So4exAfPrUS_OjZ9Q7nBQOdMh7gAazqOtIW1lcq2OmzKRwWDGUeEOnYWSj1IQ/exec';
-
-  const fetchData = async () => {
-    try {
-      setError(null);
-      const response = await fetch(`${API_BASE_URL}?action=dashboard`);
-
-      if (!response.ok) {
-        throw new Error(`API Error: ${response.status}`);
-      }
-
-      const jsonData = await response.json();
-      setData(jsonData);
-      setLastUpdated(new Date());
-    } catch (err) {
-      setError(err.message);
-      console.error('Failed to fetch dashboard data:', err);
-    } finally {
-      setLoading(false);
-      setIsRefreshing(false);
-    }
-  };
-
-  const handleRefresh = async () => {
-    setIsRefreshing(true);
-    await fetchData();
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, []);
+  // Use data from props (no duplicate fetch needed)
+  const tasks = data?.tasks || [];
+  const subscriptions = data?.subscriptions || [];
+  const flaggedEmails = data?.flaggedEmails || [];
+  const subscriptionsRenewing = data?.subscriptions_renewing || [];
+  const summary = data?.summary || {};
 
   // NEW: Initialize Web Speech API (Session 1.5)
   useEffect(() => {
@@ -193,11 +157,9 @@ const Dashboard = () => {
 
       const result = await response.json();
       if (result.success) {
-        setData((prevData) => ({
-          ...prevData,
-          tasks: prevData.tasks.filter((t) => t.task_id !== task.task_id),
-        }));
-        setTimeout(() => fetchData(), 500);
+        // Task is removed from the optimistic update below
+        // No need to wait 500ms or refetch - the task is already hidden
+        onRefresh();
       }
     } catch (err) {
       console.error('Error completing task:', err);
@@ -556,9 +518,9 @@ const Dashboard = () => {
         <section className="mb-6">
           <h2 className="text-lg font-bold text-gray-900 mb-4">Tasks</h2>
 
-          {data.tasks && data.tasks.length > 0 ? (
+          {tasks && tasks.length > 0 ? (
             <div className="space-y-2">
-              {data.tasks.map((task) => (
+              {tasks.map((task) => (
                 <div
                   key={task.task_id}
                   className={`p-4 rounded-lg border-l-4 transition-colors ${
@@ -623,11 +585,11 @@ const Dashboard = () => {
           )}
         </section>
 
-        {data.subscriptions_renewing && data.subscriptions_renewing.length > 0 && (
+        {subscriptionsRenewing && subscriptionsRenewing.length > 0 && (
           <section className="mb-6">
             <h2 className="text-lg font-bold text-gray-900 mb-4">Upcoming Renewals</h2>
             <div className="space-y-2">
-              {data.subscriptions_renewing.map((sub) => (
+              {subscriptionsRenewing.map((sub) => (
                 <div key={sub.subscription_id} className="bg-white rounded-lg p-4 border border-gray-200">
                   <div className="flex items-center justify-between">
                     <div>
@@ -651,12 +613,12 @@ const Dashboard = () => {
           </section>
         )}
 
-        {data.summary && data.summary.unread_flagged_emails > 0 && (
+        {summary && summary.unread_flagged_emails > 0 && (
           <section className="mb-6">
             <h2 className="text-lg font-bold text-gray-900 mb-4">Flagged Emails</h2>
             <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
               <p className="text-blue-900">
-                You have <span className="font-bold">{data.summary.unread_flagged_emails}</span> flagged emails
+                You have <span className="font-bold">{summary.unread_flagged_emails}</span> flagged emails
               </p>
               <p className="text-sm text-blue-700 mt-2">Review them in Gmail to keep on top of important messages</p>
             </div>
