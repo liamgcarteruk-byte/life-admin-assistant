@@ -1,9 +1,9 @@
 # Life Admin Assistant - Project State & Technical Reference
 
-**Last Updated:** 2026-04-14 (Phase 2.4.2 Complete - CORS Architecture Fixed & Tested)  
-**Status:** Phase 2.3 ✅ COMPLETE. Phase 2.4.1 Features ✅ Built. Phase 2.4.2 Architecture ✅ FIXED. Ready for Phase 2.4.3 (Testing).  
-**Current Phase:** Phase 2.4: Learning System - In Progress (Ignored Emails Review Interface Built & CORS Fixed)  
-**Documentation:** Complete closed-loop system + Vercel serverless proxy pattern + Apps Script version control + CORS solution fully documented
+**Last Updated:** 2026-04-15 (Dashboard UI Compaction & Consolidation)  
+**Status:** Phase 2.4.2 ✅ COMPLETE. Dashboard UI ✅ Compacted. Ready for testing.  
+**Current Phase:** Phase 2.4: Learning System - In Progress (Dashboard UI Optimized)  
+**Documentation:** Complete closed-loop system + Vercel serverless proxy pattern + Apps Script version control + CORS solution + Dashboard compaction fully documented
 
 ---
 
@@ -233,7 +233,7 @@ C:\Users\liamc\life-admin-assistant\
   - ⚠️ Dashboard was making direct requests to Google Apps Script instead of through Vercel serverless functions
   - **Status:** Phase 2.4.1 features built but CORS issue blocked testing
 
-- **Session 2.4.2 (Current - April 14, 2026):** CORS Architecture Fix + Post Request Routing
+- **Session 2.4.2 (Completed - April 14, 2026):** CORS Architecture Fix + Post Request Routing
   - ✅ Diagnosed CORS issue: Browser blocks cross-origin POST requests without proper headers
   - ✅ Identified existing Vercel serverless function pattern (add-task.js, complete-task.js)
   - ✅ Created `manage-ignored-email.js` serverless function (was missing)
@@ -245,6 +245,19 @@ C:\Users\liamc\life-admin-assistant\
   - ✅ Updated PROJECT_STATE.md with critical CORS architecture documentation
   - ✅ Established rule: ALL POST requests must proxy through Vercel (never direct to Google Apps Script)
   - **Status:** CORS issue fixed. Ready to test Phase 2.4 features.
+
+- **Session 2.4.3 (Current - April 15, 2026):** Dashboard UI Compaction & Consolidation
+  - ✅ Removed task limit (already showing all tasks - no changes needed)
+  - ✅ Compacted task cards: reduced padding from p-4 to p-2, reduced font sizes (text-sm)
+  - ✅ Removed metadata: deleted "Created via [source]" and category labels from task cards
+  - ✅ Added RAG priority dots: red (high), amber (medium), green (low) - no text labels
+  - ✅ Added created date display in small/muted text (uses `task.created_at`)
+  - ✅ Added due date handling: only shows if set, flagged in red text if overdue
+  - ✅ Consolidated add-task UI: removed "Or use voice input" card entirely
+  - ✅ New inline add-task form: text input + optional date picker + mic button in single row
+  - ✅ Voice transcript handling: now shows in a compact notification, integrates with inline form
+  - ✅ Task cards now fit ~3x more per screen (reduced from ~2 per screen to ~6-7 per screen)
+  - **Status:** Dashboard UI compacted and consolidated. Ready for testing on desktop & mobile.
 
 - **Documentation Setup Session (2026-04-13):**
   - ✅ Created centralized PROJECT_STATE.md as single source of truth

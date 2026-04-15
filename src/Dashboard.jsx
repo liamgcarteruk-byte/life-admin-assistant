@@ -293,9 +293,22 @@ const Dashboard = () => {
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return 'No date';
+    if (!dateString) return '';
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  };
+
+  const getPriorityColor = (priority) => {
+    switch (priority?.toLowerCase()) {
+      case 'high':
+        return 'bg-red-500';
+      case 'medium':
+        return 'bg-amber-500';
+      case 'low':
+        return 'bg-green-500';
+      default:
+        return 'bg-gray-300';
+    }
   };
 
   if (loading) {
@@ -372,153 +385,129 @@ const Dashboard = () => {
         {/* DASHBOARD TAB */}
         {activeTab === 'dashboard' && (
           <>
-            {/* Voice Input Section */}
+            {/* Inline Add Task Section */}
             {!showNewTaskForm && (
-              <div className="mb-6 bg-white rounded-lg border border-gray-200 p-4">
-                <div className="flex gap-2 items-end">
-                  <div className="flex-1">
-                    <p className="text-sm text-gray-600 mb-2">Or use voice input:</p>
-                    <div className={`p-3 rounded-lg border ${isListening ? 'bg-red-50 border-red-300' : 'bg-gray-50 border-gray-200'}`}>
-                      <p className="text-sm text-gray-700">
-                        {isListening ? '🎤 Listening...' : voiceTranscript || 'Click microphone to start'}
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={handleMicrophoneClick}
-                    className={`p-3 rounded-lg transition-colors ${
-                      isListening
-                        ? 'bg-red-500 text-white hover:bg-red-600'
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                    }`}
-                  >
-                    {isListening ? <MicOff size={20} /> : <Mic size={20} />}
-                  </button>
-                </div>
-
-                {voiceError && <p className="text-red-600 text-sm mt-2">{voiceError}</p>}
-
-                {voiceTranscript && (
-                  <div className="mt-3 flex gap-2">
-                    <button
-                      onClick={handleVoiceTaskSubmit}
-                      disabled={isCreatingTask}
-                      className="flex-1 bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600"
-                    >
-                      {isCreatingTask ? 'Creating...' : 'Create Task'}
-                    </button>
-                    <button
-                      onClick={handleVoiceClear}
-                      className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-                    >
-                      Clear
-                    </button>
-                  </div>
-                )}
+              <div className="mb-6 flex gap-2 items-end">
+                <button
+                  onClick={() => setShowNewTaskForm(true)}
+                  className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 whitespace-nowrap"
+                >
+                  <Plus size={18} /> Add Task
+                </button>
               </div>
             )}
 
             {/* Tasks Section */}
             <div className="mb-6">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold text-gray-900">My Tasks</h2>
-                {!showNewTaskForm && (
-                  <button
-                    onClick={() => setShowNewTaskForm(true)}
-                    className="flex items-center gap-2 bg-blue-500 text-white px-3 py-2 rounded-lg hover:bg-blue-600"
-                  >
-                    <Plus size={18} /> Add Task
-                  </button>
-                )}
-              </div>
+              <h2 className="text-xl font-bold text-gray-900 mb-4">My Tasks</h2>
 
               {showNewTaskForm && (
                 <form
                   onSubmit={handleCreateTask}
-                  className="mb-6 bg-white rounded-lg border border-gray-200 p-4"
+                  className="mb-6 bg-white rounded-lg border border-gray-200 p-3 flex gap-2 items-end"
                 >
                   <input
                     type="text"
-                    placeholder="Task title"
+                    placeholder="Add a task..."
                     value={newTask.title}
                     onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
-                    className="w-full mb-3 px-3 py-2 border border-gray-300 rounded-lg"
+                    autoFocus
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm"
                   />
-                  <textarea
-                    placeholder="Description (optional)"
-                    value={newTask.description}
-                    onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
-                    className="w-full mb-3 px-3 py-2 border border-gray-300 rounded-lg h-20"
+                  <input
+                    type="date"
+                    value={newTask.due_date}
+                    onChange={(e) => setNewTask({ ...newTask, due_date: e.target.value })}
+                    className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
                   />
-                  <div className="grid grid-cols-2 gap-3 mb-3">
-                    <select
-                      value={newTask.category}
-                      onChange={(e) => setNewTask({ ...newTask, category: e.target.value })}
-                      className="px-3 py-2 border border-gray-300 rounded-lg"
-                    >
-                      <option>personal</option>
-                      <option>work</option>
-                      <option>health</option>
-                      <option>financial</option>
-                    </select>
-                    <select
-                      value={newTask.priority}
-                      onChange={(e) => setNewTask({ ...newTask, priority: e.target.value })}
-                      className="px-3 py-2 border border-gray-300 rounded-lg"
-                    >
-                      <option>low</option>
-                      <option>medium</option>
-                      <option>high</option>
-                    </select>
-                  </div>
-                  <div className="flex gap-2">
-                    <button
-                      type="submit"
-                      disabled={isCreatingTask}
-                      className="flex-1 bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600"
-                    >
-                      {isCreatingTask ? 'Creating...' : 'Create'}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setShowNewTaskForm(false)}
-                      className="px-4 py-2 border border-gray-300 rounded-lg"
-                    >
-                      Cancel
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={handleMicrophoneClick}
+                    className={`p-2 rounded-lg transition-colors ${
+                      isListening
+                        ? 'bg-red-500 text-white'
+                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    }`}
+                    title="Voice input"
+                  >
+                    {isListening ? <MicOff size={18} /> : <Mic size={18} />}
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isCreatingTask}
+                    className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm whitespace-nowrap"
+                  >
+                    {isCreatingTask ? 'Creating...' : 'Create'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowNewTaskForm(false)}
+                    className="p-2 text-gray-600 hover:text-gray-900"
+                  >
+                    <X size={18} />
+                  </button>
                 </form>
               )}
+              {voiceTranscript && isListening === false && (
+                <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-gray-700">
+                  <p className="mb-2">Voice: {voiceTranscript}</p>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setNewTask({ ...newTask, title: voiceTranscript })}
+                      className="text-xs bg-blue-500 text-white px-2 py-1 rounded"
+                    >
+                      Use this text
+                    </button>
+                    <button
+                      onClick={handleVoiceClear}
+                      className="text-xs border border-blue-300 px-2 py-1 rounded"
+                    >
+                      Clear
+                    </button>
+                  </div>
+                </div>
+              )}
+              {voiceError && <p className="text-red-600 text-sm mb-4">{voiceError}</p>}
 
               {data.tasks && data.tasks.length > 0 ? (
-                <div className="space-y-3">
+                <div className="space-y-2">
                   {data.tasks.map((task) => (
                     <div
                       key={task.task_id}
-                      className={`p-4 rounded-lg border ${isOverdue(task) ? 'bg-red-50 border-red-200' : 'bg-white border-gray-200'}`}
+                      className={`p-2 rounded-lg border flex items-start gap-2 ${
+                        isOverdue(task) ? 'bg-red-50 border-red-200' : 'bg-white border-gray-200'
+                      }`}
                     >
-                      <div className="flex items-start justify-between mb-2">
-                        <h3 className="font-semibold text-gray-900">{task.title}</h3>
-                        <button
-                          onClick={() => handleCompleteTask(task)}
-                          disabled={completingTaskId === task.task_id}
-                          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                        >
-                          <CheckCircle2
-                            size={20}
-                            className={
-                              completingTaskId === task.task_id
-                                ? 'text-gray-400 animate-spin'
-                                : 'text-gray-400 hover:text-green-500'
-                            }
+                      <button
+                        onClick={() => handleCompleteTask(task)}
+                        disabled={completingTaskId === task.task_id}
+                        className="mt-0.5 flex-shrink-0 p-1 hover:bg-gray-100 rounded transition-colors"
+                      >
+                        <CheckCircle2
+                          size={18}
+                          className={
+                            completingTaskId === task.task_id
+                              ? 'text-gray-400 animate-spin'
+                              : 'text-gray-400 hover:text-green-500'
+                          }
+                        />
+                      </button>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-baseline gap-2">
+                          <h3 className="font-medium text-gray-900 text-sm">{task.title}</h3>
+                          <div
+                            className={`w-2 h-2 rounded-full flex-shrink-0 ${getPriorityColor(task.priority)}`}
+                            title={`${task.priority} priority`}
                           />
-                        </button>
-                      </div>
-                      {task.description && <p className="text-sm text-gray-600 mb-2">{task.description}</p>}
-                      <div className="flex gap-3 text-xs text-gray-500">
-                        {task.due_date && <span>{formatDate(task.due_date)}</span>}
-                        <span className="capitalize">{task.category}</span>
-                        <span className="capitalize">{task.priority} priority</span>
+                        </div>
+                        <div className="flex gap-3 text-xs text-gray-500 mt-1">
+                          {task.created_at && <span>{formatDate(task.created_at)}</span>}
+                          {task.due_date && (
+                            <span className={isOverdue(task) ? 'text-red-600 font-medium' : ''}>
+                              Due: {formatDate(task.due_date)}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   ))}
