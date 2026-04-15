@@ -630,6 +630,34 @@ Do NOT commit credentials to GitHub. If API key is exposed, rotate immediately a
 
 ---
 
+- **Session 2.5.1 (April 15, 2026):** Root Folder Structure Cleanup & Security Fix
+  - ✅ Audited root folder structure against expected layout
+  - ✅ Identified 7 files for deletion (duplicates + old versions):
+    - `src/Dashboard_Phase2.4.jsx` (old versioned copy)
+    - `src/components/Dashboard.jsx` (duplicate)
+    - `src/components/SendersTab.jsx` (duplicate)
+    - `apps-script-phase-2.3-2.4-complete.js` (old version)
+    - `apps-script-main.backup-2026-04-15.js` (backup)
+    - `Life_Admin_Assistant_Build_Plan (1).docx` (old build plan)
+    - `SENDER_FILTERING_SETUP.md` (guide file)
+  - ✅ Fixed `.gitignore` to properly exclude API key files (removed quotes)
+  - ✅ Resolved GitHub push protection security alert (API key was exposed in commit history)
+  - ✅ Rotated Anthropic API key for security
+  - ✅ Cleaned up git history and pushed changes
+  - ⚠️ App not yet functional - frontend/backend integration needs testing
+  - **Status:** Structure cleaned, security fixed, ready for integration testing
+  - **Next Session:** Debug why app isn't working - likely Apps Script not deployed or frontend/backend mismatch
+
+- **Session 2.5.2 (April 15, 2026):** Sender Status Toggle Debug & Fix
+  - ⚠️ **Bug Found:** Sender status toggle returning 500 error
+  - 🔍 **Root Cause:** `/api/manage-sender.js` had `import fetch from 'node-fetch'` which fails in Vercel's Node environment
+  - ✅ **Fix Applied:** Removed node-fetch import — Vercel has native `fetch` built-in
+  - ✅ **Deployed:** Fix pushed to GitHub, Vercel auto-deploying
+  - **Status:** Sender toggle should now work correctly
+  - **Next:** Test sender status cycling in app after Vercel deployment completes
+
+---
+
 **Last Maintained:** 2026-04-15  
-**Status:** Phase 2.5 - Email Sender Management - Code complete, awaiting deployment  
-**Next Update:** After Apps Script deployment and sender filtering tested
+**Status:** Phase 2.5 - Email Sender Management - Bug fix deployed, awaiting verification testing  
+**Next Update:** After testing sender toggle functionality
