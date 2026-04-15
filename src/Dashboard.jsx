@@ -128,7 +128,7 @@ const Dashboard = () => {
 
     setIsCreatingTask(true);
     try {
-      const response = await fetch(API_BASE_URL, {
+      const response = await fetch('/api/add-task', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -176,7 +176,7 @@ const Dashboard = () => {
   const handleCompleteTask = async (task) => {
     setCompletingTaskId(task.task_id);
     try {
-      const response = await fetch(API_BASE_URL, {
+      const response = await fetch('/api/complete-task', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -218,7 +218,7 @@ const Dashboard = () => {
 
     setIsCreatingTask(true);
     try {
-      const response = await fetch(API_BASE_URL, {
+      const response = await fetch('/api/add-task', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
