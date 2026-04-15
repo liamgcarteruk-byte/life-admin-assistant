@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from './AuthContext';
 import Dashboard from './Dashboard';
 import Subscriptions from './Subscriptions';
+import SendersTab from './SendersTab';
 import BottomNav from './BottomNav';
 import Login from './Login';
 import { RefreshCw, AlertCircle, LogOut } from 'lucide-react';
@@ -161,6 +162,8 @@ function App() {
             lastUpdated={lastUpdated}
           />
         )}
+
+        {activeTab === 'senders' && <SendersTab />}
       </div>
 
       {/* Bottom Navigation */}

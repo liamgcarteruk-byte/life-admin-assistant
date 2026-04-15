@@ -1,10 +1,11 @@
 import React from 'react';
-import { CheckSquare, CreditCard } from 'lucide-react';
+import { CheckSquare, CreditCard, Mail } from 'lucide-react';
 
 const BottomNav = ({ activeTab, onTabChange }) => {
   const tabs = [
     { id: 'tasks', label: 'Tasks', icon: CheckSquare },
     { id: 'subscriptions', label: 'Subscriptions', icon: CreditCard },
+    { id: 'senders', label: 'Senders', icon: Mail },
   ];
 
   return (

@@ -1,7 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { RefreshCw, AlertCircle, CheckCircle2, Clock, Plus, Mic, MicOff, Send, X } from 'lucide-react';
-import SendersTab from './SendersTab';
-
 const Dashboard = ({ data = {}, onRefresh, isRefreshing = false, lastUpdated = null }) => {
   // Local state for UI interactions only (not data fetching)
   const [showNewTaskForm, setShowNewTaskForm] = useState(false);
@@ -22,9 +20,6 @@ const Dashboard = ({ data = {}, onRefresh, isRefreshing = false, lastUpdated = n
   const [voiceTranscript, setVoiceTranscript] = useState('');
   const [voiceError, setVoiceError] = useState(null);
   const recognitionRef = useRef(null);
-
-  // NEW: State for tab navigation (Phase 2.5)
-  const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard' or 'senders'
 
   // Use data from props (no duplicate fetch needed)
   const tasks = data?.tasks || [];
@@ -248,55 +243,7 @@ const Dashboard = ({ data = {}, onRefresh, isRefreshing = false, lastUpdated = n
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div className="max-w-2xl mx-auto px-4 py-4 flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Life Admin</h1>
-            <p className="text-sm text-gray-500">{getTodayDate()}</p>
-          </div>
-          <button
-            onClick={onRefresh}
-            disabled={isRefreshing}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-            title="Refresh"
-          >
-            <RefreshCw
-              className={`w-5 h-5 text-gray-600 ${isRefreshing ? 'animate-spin' : ''}`}
-            />
-          </button>
-        </div>
-      </div>
-
-      {/* Tab Navigation (Phase 2.5) */}
-      <div className="border-b border-gray-200 bg-white sticky top-16 z-9">
-        <div className="max-w-2xl mx-auto px-4 flex gap-4">
-          <button
-            onClick={() => setActiveTab('dashboard')}
-            className={`py-3 px-2 border-b-2 transition-colors ${
-              activeTab === 'dashboard'
-                ? 'border-blue-500 text-blue-600 font-medium'
-                : 'border-transparent text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            Dashboard
-          </button>
-          <button
-            onClick={() => setActiveTab('senders')}
-            className={`py-3 px-2 border-b-2 transition-colors ${
-              activeTab === 'senders'
-                ? 'border-blue-500 text-blue-600 font-medium'
-                : 'border-transparent text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            Email Senders
-          </button>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      {activeTab === 'dashboard' ? (
-      <div className="max-w-2xl mx-auto px-4 py-6">
+    <>
 
         {/* NEW: Voice Input Section (Session 1.5) */}
         {voiceTranscript || isListening || voiceError ? (
@@ -374,17 +321,17 @@ const Dashboard = ({ data = {}, onRefresh, isRefreshing = false, lastUpdated = n
             <div className="flex gap-2">
               <button
                 onClick={() => setShowNewTaskForm(true)}
-                className="flex-1 bg-blue-500 text-white px-4 py-3 rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center gap-2 font-medium"
+                className="flex items-center gap-1.5 px-3 py-1.5 border border-blue-500 text-blue-600 text-sm rounded-lg hover:bg-blue-50 transition-colors font-medium"
               >
-                <Plus className="w-5 h-5" />
-                Add New Task
+                <Plus className="w-4 h-4" />
+                Add Task
               </button>
               <button
                 onClick={handleMicrophoneClick}
-                className="bg-blue-500 text-white px-4 py-3 rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center gap-2 font-medium"
+                className="p-1.5 border border-blue-500 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
                 title="Create task with voice input"
               >
-                <Mic className="w-5 h-5" />
+                <Mic className="w-4 h-4" />
               </button>
             </div>
           ) : (
@@ -602,13 +549,7 @@ const Dashboard = ({ data = {}, onRefresh, isRefreshing = false, lastUpdated = n
             </p>
           </div>
         )}
-      </div>
-      ) : (
-      <div className="max-w-2xl mx-auto">
-        <SendersTab />
-      </div>
-      )}
-    </div>
+    </>
   );
 };
 
