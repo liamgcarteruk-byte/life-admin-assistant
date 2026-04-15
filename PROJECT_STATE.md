@@ -248,16 +248,18 @@ C:\Users\liamc\life-admin-assistant\
 
 - **Session 2.4.3 (Current - April 15, 2026):** Dashboard UI Compaction & Consolidation
   - ✅ Removed task limit (already showing all tasks - no changes needed)
-  - ✅ Compacted task cards: reduced padding from p-4 to p-2, reduced font sizes (text-sm)
+  - ✅ Compacted task cards: reduced padding from p-4 to p-2, reduced gaps (gap-4 → gap-3, gap-3 → gap-2)
   - ✅ Removed metadata: deleted "Created via [source]" and category labels from task cards
-  - ✅ Added RAG priority dots: red (high), amber (medium), green (low) - no text labels
-  - ✅ Added created date display in small/muted text (uses `task.created_at`)
-  - ✅ Added due date handling: only shows if set, flagged in red text if overdue
+  - ✅ Changed priority indicator: replaced dot with colored bottom bar (red/amber/green, h-1 height)
+  - ✅ Added circular checkbox on left (gray, clickable for task completion, hover to green)
+  - ✅ Layout: checkbox → title (flex-1, truncates) → dates on right
+  - ✅ Added created date display: "Added: Apr 14" in small gray text
+  - ✅ Added due date handling: only shows if set, same gray color as created date (no red highlighting)
   - ✅ Consolidated add-task UI: removed "Or use voice input" card entirely
   - ✅ New inline add-task form: text input + optional date picker + mic button in single row
-  - ✅ Voice transcript handling: now shows in a compact notification, integrates with inline form
-  - ✅ Task cards now fit ~3x more per screen (reduced from ~2 per screen to ~6-7 per screen)
-  - **Status:** Dashboard UI compacted and consolidated. Ready for testing on desktop & mobile.
+  - ✅ Voice transcript handling: shows in compact notification, integrates with inline form
+  - ✅ Task cards now fit ~6-7 per screen (compact design with p-2 padding, tight gaps)
+  - **Status:** Dashboard UI fully redesigned with compact cards, colored priority bars, and clean layout. Ready for testing on desktop & mobile.
 
 - **Documentation Setup Session (2026-04-13):**
   - ✅ Created centralized PROJECT_STATE.md as single source of truth

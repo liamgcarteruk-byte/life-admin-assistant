@@ -472,40 +472,19 @@ const Dashboard = () => {
               {data.tasks && data.tasks.length > 0 ? (
                 <div className="space-y-2">
                   {data.tasks.map((task) => (
-                    <div
-                      key={task.task_id}
-                      className={`rounded-lg border flex items-center justify-between gap-3 overflow-hidden ${
-                        isOverdue(task) ? 'bg-red-50 border-red-200' : 'bg-white border-gray-200'
-                      }`}
-                    >
-                      <div className={`w-1 h-full ${getPriorityColor(task.priority)}`} />
-                      <div className="p-3 flex items-center justify-between gap-3 flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-1 min-w-0">
-                          <button
-                            onClick={() => handleCompleteTask(task)}
-                            disabled={completingTaskId === task.task_id}
-                            className="flex-shrink-0 p-1 hover:bg-gray-100 rounded transition-colors"
-                          >
-                            <CheckCircle2
-                              size={18}
-                              className={
-                                completingTaskId === task.task_id
-                                  ? 'text-gray-400 animate-spin'
-                                  : 'text-gray-400 hover:text-green-500'
-                              }
-                            />
-                          </button>
-                          <h3 className="font-medium text-gray-900 text-sm truncate">{task.title}</h3>
-                        </div>
-                        <div className="flex gap-4 text-xs text-gray-500 whitespace-nowrap flex-shrink-0">
+                    <div key={task.task_id} className="overflow-hidden rounded-lg border border-gray-200">
+                      <div
+                        className="bg-white p-2 flex items-center justify-between gap-2 cursor-pointer hover:bg-gray-50 transition-colors"
+                        onClick={() => handleCompleteTask(task)}
+                      >
+                        <CheckCircle2 size={18} className="text-gray-400 flex-shrink-0 hover:text-green-500" />
+                        <h3 className="font-medium text-gray-900 text-sm flex-1 truncate">{task.title}</h3>
+                        <div className="flex gap-3 text-xs text-gray-500 whitespace-nowrap flex-shrink-0">
                           {task.created_at && <span>Added: {formatDate(task.created_at)}</span>}
-                          {task.due_date && (
-                            <span className={isOverdue(task) ? 'text-red-600 font-medium' : ''}>
-                              Due: {formatDate(task.due_date)}
-                            </span>
-                          )}
+                          {task.due_date && <span>Due: {formatDate(task.due_date)}</span>}
                         </div>
                       </div>
+                      <div className={`h-1 ${getPriorityColor(task.priority)}`} />
                     </div>
                   ))}
                 </div>
