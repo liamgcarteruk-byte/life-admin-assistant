@@ -13,7 +13,7 @@ export default function SendersTab() {
   const fetchSenders = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${import.meta.env.VITE_APPS_SCRIPT_API}?action=senders`);
+      const response = await fetch(`https://script.google.com/macros/s/AKfycbyQ5tZz5So4exAfPrUS_OjZ9Q7nBQOdMh7gAazqOtIW1lcq2OmzKRwWDGUeEOnYWSj1IQ/exec?action=senders`);
       const data = await response.json();
 
       if (data.success) {
