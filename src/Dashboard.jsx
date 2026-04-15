@@ -256,7 +256,7 @@ const Dashboard = ({ data = {}, onRefresh, isRefreshing = false, lastUpdated = n
             <p className="text-sm text-gray-500">{getTodayDate()}</p>
           </div>
           <button
-            onClick={handleRefresh}
+            onClick={onRefresh}
             disabled={isRefreshing}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
             title="Refresh"
