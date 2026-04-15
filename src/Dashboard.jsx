@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { RefreshCw, AlertCircle, CheckCircle2, Clock, Plus, Mic, MicOff, Send, X, Trash2, Eye, Shield } from 'lucide-react';
+import { RefreshCw, AlertCircle, CheckCircle2, Clock, Plus, Mic, MicOff, Send, X } from 'lucide-react';
+import SendersTab from './SendersTab';
 
 const Dashboard = () => {
   const [data, setData] = useState({
     tasks: [],
     subscriptions: [],
     flaggedEmails: [],
-    ignoredEmails: [],
   });
 
   const [loading, setLoading] = useState(true);
@@ -14,10 +14,7 @@ const Dashboard = () => {
   const [lastUpdated, setLastUpdated] = useState(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // NEW: Tab state for Phase 2.4
-  const [activeTab, setActiveTab] = useState('dashboard');
-
-  // State for the task creation form
+  // NEW: State for the task creation form
   const [showNewTaskForm, setShowNewTaskForm] = useState(false);
   const [newTask, setNewTask] = useState({
     title: '',
@@ -28,44 +25,35 @@ const Dashboard = () => {
   });
   const [isCreatingTask, setIsCreatingTask] = useState(false);
 
-  // State for handling task completion
+  // NEW: State for handling task completion
   const [completingTaskId, setCompletingTaskId] = useState(null);
 
-  // State for voice input
+  // NEW: State for voice input (Session 1.5)
   const [isListening, setIsListening] = useState(false);
   const [voiceTranscript, setVoiceTranscript] = useState('');
   const [voiceError, setVoiceError] = useState(null);
   const recognitionRef = useRef(null);
 
-  // NEW: State for managing ignored emails
-  const [processingEmailId, setProcessingEmailId] = useState(null);
-  const [ignoredEmailFilters, setIgnoredEmailFilters] = useState({
-    reason: 'all', // 'all', 'spam', 'not_relevant', 'pending_review'
-  });
+  // NEW: State for tab navigation (Phase 2.5)
+  const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard' or 'senders'
 
   const API_BASE_URL = 'https://script.google.com/macros/s/AKfycbyQ5tZz5So4exAfPrUS_OjZ9Q7nBQOdMh7gAazqOtIW1lcq2OmzKRwWDGUeEOnYWSj1IQ/exec';
 
   const fetchData = async () => {
     try {
       setError(null);
-      const dashboardResponse = await fetch(`${API_BASE_URL}?action=dashboard`);
-      const ignoredEmailsResponse = await fetch(`${API_BASE_URL}?action=ignored-emails`);
+      const response = await fetch(`${API_BASE_URL}?action=dashboard`);
 
-      if (!dashboardResponse.ok || !ignoredEmailsResponse.ok) {
-        throw new Error('Failed to fetch data');
+      if (!response.ok) {
+        throw new Error(`API Error: ${response.status}`);
       }
 
-      const dashboardData = await dashboardResponse.json();
-      const ignoredEmailsData = await ignoredEmailsResponse.json();
-
-      setData({
-        ...dashboardData,
-        ignoredEmails: ignoredEmailsData.emails || [],
-      });
+      const jsonData = await response.json();
+      setData(jsonData);
       setLastUpdated(new Date());
     } catch (err) {
       setError(err.message);
-      console.error('Failed to fetch data:', err);
+      console.error('Failed to fetch dashboard data:', err);
     } finally {
       setLoading(false);
       setIsRefreshing(false);
@@ -81,41 +69,49 @@ const Dashboard = () => {
     fetchData();
   }, []);
 
-  // Initialize Web Speech API
+  // NEW: Initialize Web Speech API (Session 1.5)
   useEffect(() => {
+    // Check if the browser supports Web Speech API
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
     if (SpeechRecognition) {
       recognitionRef.current = new SpeechRecognition();
 
+      // When speech is recognized, update the transcript
       recognitionRef.current.onresult = (event) => {
         let transcript = '';
+        // Loop through the recognized results
         for (let i = event.resultIndex; i < event.results.length; i++) {
           transcript += event.results[i][0].transcript;
         }
         setVoiceTranscript(transcript);
       };
 
+      // Handle errors
       recognitionRef.current.onerror = (event) => {
         setVoiceError(`Microphone error: ${event.error}`);
       };
 
+      // When recognition ends, stop the listening state
       recognitionRef.current.onend = () => {
         setIsListening(false);
       };
     }
   }, []);
 
+  // NEW: Handle microphone button press (Session 1.5)
   const handleMicrophoneClick = () => {
     if (!recognitionRef.current) {
-      setVoiceError('Web Speech API not supported');
+      setVoiceError('Web Speech API not supported in this browser');
       return;
     }
 
     if (isListening) {
+      // Stop listening
       recognitionRef.current.stop();
       setIsListening(false);
     } else {
+      // Start listening
       setVoiceError(null);
       setVoiceTranscript('');
       setIsListening(true);
@@ -123,6 +119,7 @@ const Dashboard = () => {
     }
   };
 
+  // NEW: Handle voice input confirmation (creates task from voice)
   const handleVoiceTaskSubmit = async () => {
     if (!voiceTranscript.trim()) {
       setVoiceError('Please speak a task description');
@@ -131,10 +128,13 @@ const Dashboard = () => {
 
     setIsCreatingTask(true);
     try {
-      const response = await fetch('/api/add-task', {
+      const response = await fetch(API_BASE_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({
+          action: 'add_task',
           title: voiceTranscript,
           category: 'personal',
           priority: 'medium',
@@ -143,7 +143,9 @@ const Dashboard = () => {
         }),
       });
 
-      if (!response.ok) throw new Error('Failed to create task');
+      if (!response.ok) {
+        throw new Error('Failed to create task');
+      }
 
       const result = await response.json();
       if (result.success) {
@@ -153,30 +155,41 @@ const Dashboard = () => {
         alert('Task created from voice input!');
       }
     } catch (err) {
-      console.error('Error:', err);
-      setVoiceError('Failed to create task');
+      console.error('Error creating voice task:', err);
+      setVoiceError('Failed to create task. Please try again.');
     } finally {
       setIsCreatingTask(false);
     }
   };
 
+  // NEW: Cancel voice input
   const handleVoiceClear = () => {
-    if (isListening) recognitionRef.current.stop();
-    setIsListening(false);
+    if (isListening) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+    }
     setVoiceTranscript('');
     setVoiceError(null);
   };
 
+  // NEW: MARK TASK COMPLETE
   const handleCompleteTask = async (task) => {
     setCompletingTaskId(task.task_id);
     try {
-      const response = await fetch('/api/complete-task', {
+      const response = await fetch(API_BASE_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ task_id: task.task_id }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: 'complete_task',
+          task_id: task.task_id,
+        }),
       });
 
-      if (!response.ok) throw new Error('Failed to complete task');
+      if (!response.ok) {
+        throw new Error('Failed to complete task');
+      }
 
       const result = await response.json();
       if (result.success) {
@@ -187,14 +200,17 @@ const Dashboard = () => {
         setTimeout(() => fetchData(), 500);
       }
     } catch (err) {
-      alert('Failed to complete task');
+      console.error('Error completing task:', err);
+      alert('Failed to complete task. Please try again.');
     } finally {
       setCompletingTaskId(null);
     }
   };
 
+  // NEW: CREATE NEW TASK
   const handleCreateTask = async (e) => {
     e.preventDefault();
+
     if (!newTask.title.trim()) {
       alert('Please enter a task title');
       return;
@@ -204,7 +220,9 @@ const Dashboard = () => {
     try {
       const response = await fetch(API_BASE_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({
           action: 'add_task',
           title: newTask.title,
@@ -215,7 +233,9 @@ const Dashboard = () => {
         }),
       });
 
-      if (!response.ok) throw new Error('Failed to create task');
+      if (!response.ok) {
+        throw new Error('Failed to create task');
+      }
 
       const result = await response.json();
       if (result.success) {
@@ -231,51 +251,11 @@ const Dashboard = () => {
         alert('Task created successfully!');
       }
     } catch (err) {
-      alert('Failed to create task');
+      console.error('Error creating task:', err);
+      alert('Failed to create task. Please try again.');
     } finally {
       setIsCreatingTask(false);
     }
-  };
-
-  // NEW: Manage ignored email actions
-  const handleIgnoredEmailAction = async (emailId, sender, action) => {
-    setProcessingEmailId(emailId);
-    try {
-      const response = await fetch('/api/manage-ignored-email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action,
-          email_id: emailId,
-          sender_email: sender,
-          sender_name: sender?.split('@')[0],
-        }),
-      });
-
-      if (!response.ok) throw new Error('Failed to process action');
-
-      const result = await response.json();
-      if (result.success) {
-        await fetchData();
-        alert(result.message || `Email ${action}d successfully`);
-      } else {
-        alert('Error: ' + (result.error || 'Unknown error'));
-      }
-    } catch (err) {
-      console.error('Error:', err);
-      alert('Failed to process action');
-    } finally {
-      setProcessingEmailId(null);
-    }
-  };
-
-  const getFilteredIgnoredEmails = () => {
-    if (ignoredEmailFilters.reason === 'all') {
-      return data.ignoredEmails;
-    }
-    return data.ignoredEmails.filter((email) =>
-      email.ignore_reason?.toLowerCase().includes(ignoredEmailFilters.reason)
-    );
   };
 
   const isOverdue = (task) => {
@@ -292,23 +272,17 @@ const Dashboard = () => {
     return today.toLocaleDateString('en-US', options);
   };
 
-  const formatDate = (dateString) => {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  const isRenewalSoon = (subscription) => {
+    const renewalDate = new Date(subscription.renewal_date);
+    const today = new Date();
+    const thirtyDaysFromNow = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
+    return renewalDate > today && renewalDate <= thirtyDaysFromNow;
   };
 
-  const getPriorityColor = (priority) => {
-    switch (priority?.toLowerCase()) {
-      case 'high':
-        return 'bg-red-500';
-      case 'medium':
-        return 'bg-amber-500';
-      case 'low':
-        return 'bg-green-500';
-      default:
-        return 'bg-gray-300';
-    }
+  const formatDate = (dateString) => {
+    if (!dateString) return 'No date';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
 
   if (loading) {
@@ -316,7 +290,7 @@ const Dashboard = () => {
       <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex items-center justify-center">
         <div className="text-center">
           <RefreshCw className="w-8 h-8 animate-spin text-blue-500 mx-auto mb-2" />
-          <p className="text-gray-600">Loading dashboard...</p>
+          <p className="text-gray-600">Loading your dashboard...</p>
         </div>
       </div>
     );
@@ -328,11 +302,11 @@ const Dashboard = () => {
         <div className="max-w-2xl mx-auto">
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 mt-4">
             <AlertCircle className="w-5 h-5 text-red-500 inline mr-2" />
-            <p className="text-red-700">Error: {error}</p>
+            <p className="text-red-700">Error loading dashboard: {error}</p>
           </div>
           <button
             onClick={handleRefresh}
-            className="mt-4 bg-blue-500 text-white px-4 py-2 rounded-lg"
+            className="mt-4 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
           >
             Try Again
           </button>
@@ -343,7 +317,6 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
-      {/* Header */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
         <div className="max-w-2xl mx-auto px-4 py-4 flex justify-between items-center">
           <div>
@@ -353,217 +326,356 @@ const Dashboard = () => {
           <button
             onClick={handleRefresh}
             disabled={isRefreshing}
-            className="p-2 hover:bg-gray-100 rounded-lg"
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
             title="Refresh"
           >
-            <RefreshCw className={`w-5 h-5 text-gray-600 ${isRefreshing ? 'animate-spin' : ''}`} />
+            <RefreshCw
+              className={`w-5 h-5 text-gray-600 ${isRefreshing ? 'animate-spin' : ''}`}
+            />
           </button>
-        </div>
-
-        {/* NEW: Tab Navigation */}
-        <div className="max-w-2xl mx-auto px-4 border-t border-gray-100 flex gap-4">
-          {[
-            { id: 'dashboard', label: 'Dashboard' },
-            { id: 'ignored-emails', label: `Ignored Emails (${data.ignoredEmails?.length || 0})` },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`py-3 px-4 border-b-2 font-medium transition-colors ${
-                activeTab === tab.id
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
         </div>
       </div>
 
+      {/* Tab Navigation (Phase 2.5) */}
+      <div className="border-b border-gray-200 bg-white sticky top-16 z-9">
+        <div className="max-w-2xl mx-auto px-4 flex gap-4">
+          <button
+            onClick={() => setActiveTab('dashboard')}
+            className={`py-3 px-2 border-b-2 transition-colors ${
+              activeTab === 'dashboard'
+                ? 'border-blue-500 text-blue-600 font-medium'
+                : 'border-transparent text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            Dashboard
+          </button>
+          <button
+            onClick={() => setActiveTab('senders')}
+            className={`py-3 px-2 border-b-2 transition-colors ${
+              activeTab === 'senders'
+                ? 'border-blue-500 text-blue-600 font-medium'
+                : 'border-transparent text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            Email Senders
+          </button>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      {activeTab === 'dashboard' ? (
       <div className="max-w-2xl mx-auto px-4 py-6">
-        {/* DASHBOARD TAB */}
-        {activeTab === 'dashboard' && (
-          <>
-            {/* Inline Add Task Section */}
-            {!showNewTaskForm && (
-              <div className="mb-6 flex gap-2 items-end">
-                <button
-                  onClick={() => setShowNewTaskForm(true)}
-                  className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 whitespace-nowrap"
-                >
-                  <Plus size={18} /> Add Task
-                </button>
+
+        {/* NEW: Voice Input Section (Session 1.5) */}
+        {voiceTranscript || isListening || voiceError ? (
+          <div className="mb-6 bg-white rounded-lg p-4 border border-blue-200 shadow-sm">
+            <h3 className="font-bold text-gray-900 mb-4">Voice Input</h3>
+
+            {voiceError && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+                <p className="text-sm text-red-700">{voiceError}</p>
               </div>
             )}
 
-            {/* Tasks Section */}
-            <div className="mb-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">My Tasks</h2>
+            <div className="mb-4 flex justify-center">
+              <button
+                onClick={handleMicrophoneClick}
+                className={`p-4 rounded-full transition-all ${
+                  isListening
+                    ? 'bg-red-500 hover:bg-red-600 shadow-lg scale-110'
+                    : 'bg-blue-500 hover:bg-blue-600'
+                } text-white`}
+                title={isListening ? 'Stop recording' : 'Start recording'}
+              >
+                {isListening ? (
+                  <Mic className="w-6 h-6 animate-pulse" />
+                ) : (
+                  <MicOff className="w-6 h-6" />
+                )}
+              </button>
+            </div>
 
-              {showNewTaskForm && (
-                <form
-                  onSubmit={handleCreateTask}
-                  className="mb-6 bg-white rounded-lg border border-gray-200 p-3 flex gap-2 items-end"
-                >
+            {isListening && (
+              <p className="text-center text-sm text-gray-500 mb-3 animate-pulse">
+                Listening... Speak now
+              </p>
+            )}
+
+            {voiceTranscript && (
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Your task:
+                </label>
+                <textarea
+                  value={voiceTranscript}
+                  onChange={(e) => setVoiceTranscript(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-20 resize-none"
+                  placeholder="Edit your transcribed task here..."
+                />
+                <p className="text-xs text-gray-400 mt-1">You can edit the text before confirming</p>
+              </div>
+            )}
+
+            <div className="flex gap-2">
+              <button
+                onClick={handleVoiceTaskSubmit}
+                disabled={isCreatingTask || !voiceTranscript.trim()}
+                className="flex-1 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 disabled:opacity-50 transition-colors font-medium flex items-center justify-center gap-2"
+              >
+                <Send className="w-4 h-4" />
+                {isCreatingTask ? 'Saving...' : 'Confirm & Save'}
+              </button>
+              <button
+                onClick={handleVoiceClear}
+                className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors font-medium flex items-center justify-center gap-2"
+              >
+                <X className="w-4 h-4" />
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : null}
+
+        {/* NEW: Add Task Button and Form */}
+        <div className="mb-6">
+          {!showNewTaskForm ? (
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowNewTaskForm(true)}
+                className="flex-1 bg-blue-500 text-white px-4 py-3 rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center gap-2 font-medium"
+              >
+                <Plus className="w-5 h-5" />
+                Add New Task
+              </button>
+              <button
+                onClick={handleMicrophoneClick}
+                className="bg-blue-500 text-white px-4 py-3 rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center gap-2 font-medium"
+                title="Create task with voice input"
+              >
+                <Mic className="w-5 h-5" />
+              </button>
+            </div>
+          ) : (
+            <div className="bg-white rounded-lg p-4 border border-blue-200 shadow-sm mb-4">
+              <form onSubmit={handleCreateTask}>
+                <h3 className="font-bold text-gray-900 mb-4">Create New Task</h3>
+
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Task Title *
+                  </label>
                   <input
                     type="text"
-                    placeholder="Add a task..."
+                    placeholder="e.g., Call dentist"
                     value={newTask.title}
                     onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
-                    autoFocus
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
-                  <input
-                    type="date"
-                    value={newTask.due_date}
-                    onChange={(e) => setNewTask({ ...newTask, due_date: e.target.value })}
-                    className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                </div>
+
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Description
+                  </label>
+                  <textarea
+                    placeholder="Add any details..."
+                    value={newTask.description}
+                    onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-20 resize-none"
                   />
-                  <button
-                    type="button"
-                    onClick={handleMicrophoneClick}
-                    className={`p-2 rounded-lg transition-colors ${
-                      isListening
-                        ? 'bg-red-500 text-white'
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                    }`}
-                    title="Voice input"
-                  >
-                    {isListening ? <MicOff size={18} /> : <Mic size={18} />}
-                  </button>
+                </div>
+
+                <div className="grid grid-cols-3 gap-3 mb-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Category
+                    </label>
+                    <select
+                      value={newTask.category}
+                      onChange={(e) => setNewTask({ ...newTask, category: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="personal">Personal</option>
+                      <option value="finance">Finance</option>
+                      <option value="health">Health</option>
+                      <option value="property">Property</option>
+                      <option value="work">Work</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Priority
+                    </label>
+                    <select
+                      value={newTask.priority}
+                      onChange={(e) => setNewTask({ ...newTask, priority: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="low">Low</option>
+                      <option value="medium">Medium</option>
+                      <option value="high">High</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Due Date
+                    </label>
+                    <input
+                      type="date"
+                      value={newTask.due_date}
+                      onChange={(e) => setNewTask({ ...newTask, due_date: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
                   <button
                     type="submit"
                     disabled={isCreatingTask}
-                    className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm whitespace-nowrap"
+                    className="flex-1 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 disabled:opacity-50 transition-colors font-medium"
                   >
-                    {isCreatingTask ? 'Creating...' : 'Create'}
+                    {isCreatingTask ? 'Creating...' : 'Create Task'}
                   </button>
                   <button
                     type="button"
                     onClick={() => setShowNewTaskForm(false)}
-                    className="p-2 text-gray-600 hover:text-gray-900"
+                    className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors font-medium"
                   >
-                    <X size={18} />
+                    Cancel
                   </button>
-                </form>
-              )}
-              {voiceTranscript && isListening === false && (
-                <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-gray-700">
-                  <p className="mb-2">Voice: {voiceTranscript}</p>
-                  <div className="flex gap-2">
+                </div>
+              </form>
+            </div>
+          )}
+        </div>
+
+
+        <section className="mb-6">
+          <h2 className="text-lg font-bold text-gray-900 mb-4">Tasks</h2>
+
+          {data.tasks && data.tasks.length > 0 ? (
+            <div className="space-y-2">
+              {data.tasks.map((task) => (
+                <div
+                  key={task.task_id}
+                  className={`p-4 rounded-lg border-l-4 transition-colors ${
+                    isOverdue(task)
+                      ? 'bg-red-50 border-red-400'
+                      : 'bg-white border-blue-400'
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
                     <button
-                      onClick={() => setNewTask({ ...newTask, title: voiceTranscript })}
-                      className="text-xs bg-blue-500 text-white px-2 py-1 rounded"
+                      onClick={() => handleCompleteTask(task)}
+                      disabled={completingTaskId === task.task_id}
+                      className="mt-1 flex-shrink-0 hover:opacity-70 transition-opacity"
+                      title="Mark task complete"
                     >
-                      Use this text
+                      <div className="w-5 h-5 rounded border-2 border-blue-400 hover:bg-blue-50 flex items-center justify-center transition-colors">
+                        {completingTaskId === task.task_id && (
+                          <RefreshCw className="w-3 h-3 animate-spin text-blue-500" />
+                        )}
+                      </div>
                     </button>
-                    <button
-                      onClick={handleVoiceClear}
-                      className="text-xs border border-blue-300 px-2 py-1 rounded"
-                    >
-                      Clear
-                    </button>
+
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <h3 className={`font-medium ${
+                          isOverdue(task) ? 'text-red-900' : 'text-gray-900'
+                        }`}>
+                          {task.title}
+                        </h3>
+                        {isOverdue(task) && (
+                          <span className="bg-red-100 text-red-700 text-xs px-2 py-1 rounded">
+                            OVERDUE
+                          </span>
+                        )}
+                      </div>
+                      {task.description && (
+                        <p className="text-sm text-gray-600 mt-1">{task.description}</p>
+                      )}
+                      <p className="text-sm text-gray-500 mt-1">{task.category}</p>
+                      <p className="text-xs text-gray-400 mt-1">
+                        Due: {formatDate(task.due_date)}
+                      </p>
+                    </div>
+                    <span className={`text-xs font-semibold px-2 py-1 rounded flex-shrink-0 ${
+                      task.priority === 'high'
+                        ? 'bg-red-100 text-red-700'
+                        : task.priority === 'medium'
+                        ? 'bg-yellow-100 text-yellow-700'
+                        : 'bg-green-100 text-green-700'
+                    }`}>
+                      {task.priority.toUpperCase()}
+                    </span>
                   </div>
                 </div>
-              )}
-              {voiceError && <p className="text-red-600 text-sm mb-4">{voiceError}</p>}
-
-              {data.tasks && data.tasks.length > 0 ? (
-                <div className="space-y-2">
-                  {data.tasks.map((task) => (
-                    <div key={task.task_id} className="overflow-hidden rounded-lg border border-gray-200">
-                      <div
-                        className="bg-white p-2 flex items-center justify-between gap-2 cursor-pointer hover:bg-gray-50 transition-colors"
-                        onClick={() => handleCompleteTask(task)}
-                      >
-                        <CheckCircle2 size={18} className="text-gray-400 flex-shrink-0 hover:text-green-500" />
-                        <h3 className="font-medium text-gray-900 text-sm flex-1 truncate">{task.title}</h3>
-                        <div className="flex gap-3 text-xs text-gray-500 whitespace-nowrap flex-shrink-0">
-                          {task.created_at && <span>Added: {formatDate(task.created_at)}</span>}
-                          {task.due_date && <span>Due: {formatDate(task.due_date)}</span>}
-                        </div>
-                      </div>
-                      <div className={`h-1 ${getPriorityColor(task.priority)}`} />
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-gray-500 text-center py-8">No pending tasks</p>
-              )}
+              ))}
             </div>
-          </>
+          ) : (
+            <div className="bg-white rounded-lg p-8 text-center">
+              <CheckCircle2 className="w-12 h-12 text-green-500 mx-auto mb-2" />
+              <p className="text-gray-600">No tasks for today! 🎉</p>
+            </div>
+          )}
+        </section>
+
+        {data.subscriptions_renewing && data.subscriptions_renewing.length > 0 && (
+          <section className="mb-6">
+            <h2 className="text-lg font-bold text-gray-900 mb-4">Upcoming Renewals</h2>
+            <div className="space-y-2">
+              {data.subscriptions_renewing.map((sub) => (
+                <div key={sub.subscription_id} className="bg-white rounded-lg p-4 border border-gray-200">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-medium text-gray-900">{sub.name}</h3>
+                      <p className="text-sm text-gray-500">${sub.cost}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className={`text-sm font-medium ${
+                        isRenewalSoon(sub) ? 'text-orange-600' : 'text-gray-600'
+                      }`}>
+                        {formatDate(sub.renewal_date)}
+                      </p>
+                      {isRenewalSoon(sub) && (
+                        <Clock className="w-4 h-4 text-orange-500 ml-auto mt-1" />
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
         )}
 
-        {/* NEW: IGNORED EMAILS TAB */}
-        {activeTab === 'ignored-emails' && (
-          <div>
-            <div className="mb-4">
-              <label className="text-sm text-gray-600 mb-2 block">Filter by reason:</label>
-              <select
-                value={ignoredEmailFilters.reason}
-                onChange={(e) => setIgnoredEmailFilters({ reason: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-              >
-                <option value="all">All ignored emails</option>
-                <option value="spam">Spam</option>
-                <option value="not_relevant">Not relevant</option>
-                <option value="pending">Pending approval</option>
-              </select>
+        {data.summary && data.summary.unread_flagged_emails > 0 && (
+          <section className="mb-6">
+            <h2 className="text-lg font-bold text-gray-900 mb-4">Flagged Emails</h2>
+            <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+              <p className="text-blue-900">
+                You have <span className="font-bold">{data.summary.unread_flagged_emails}</span> flagged emails
+              </p>
+              <p className="text-sm text-blue-700 mt-2">Review them in Gmail to keep on top of important messages</p>
             </div>
+          </section>
+        )}
 
-            {getFilteredIgnoredEmails().length > 0 ? (
-              <div className="space-y-3">
-                {getFilteredIgnoredEmails().map((email) => (
-                  <div
-                    key={email.email_id}
-                    className="bg-white rounded-lg border border-gray-200 p-4"
-                  >
-                    <div className="mb-3">
-                      <div className="flex justify-between items-start mb-1">
-                        <h3 className="font-semibold text-gray-900">{email.subject}</h3>
-                        <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
-                          {email.ignore_reason}
-                        </span>
-                      </div>
-                      <p className="text-sm text-gray-600">{email.from}</p>
-                      <p className="text-xs text-gray-500 mt-1">{formatDate(email.received_at)}</p>
-                    </div>
-
-                    <div className="flex gap-2 flex-wrap">
-                      <button
-                        onClick={() => handleIgnoredEmailAction(email.email_id, email.from, 'approve')}
-                        disabled={processingEmailId === email.email_id}
-                        className="flex items-center gap-1 px-3 py-2 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 text-sm"
-                      >
-                        <Eye size={14} /> Approve
-                      </button>
-                      <button
-                        onClick={() => handleIgnoredEmailAction(email.email_id, email.from, 'whitelist_sender')}
-                        disabled={processingEmailId === email.email_id}
-                        className="flex items-center gap-1 px-3 py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 text-sm"
-                      >
-                        <Shield size={14} /> Whitelist Sender
-                      </button>
-                      <button
-                        onClick={() => handleIgnoredEmailAction(email.email_id, email.from, 'delete')}
-                        disabled={processingEmailId === email.email_id}
-                        className="flex items-center gap-1 px-3 py-2 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 text-sm"
-                      >
-                        <Trash2 size={14} /> Delete
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-12">
-                <p className="text-gray-500">No ignored emails</p>
-              </div>
-            )}
+        {lastUpdated && (
+          <div className="text-center mt-8 mb-4">
+            <p className="text-xs text-gray-400">
+              Last updated: {lastUpdated.toLocaleTimeString()}
+            </p>
           </div>
         )}
       </div>
+      ) : (
+      <div className="max-w-2xl mx-auto">
+        <SendersTab />
+      </div>
+      )}
     </div>
   );
 };
