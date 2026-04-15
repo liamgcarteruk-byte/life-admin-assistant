@@ -115,8 +115,8 @@ const Dashboard = ({ data = {}, onRefresh, isRefreshing = false, lastUpdated = n
       if (result.success) {
         setVoiceTranscript('');
         setVoiceError(null);
-        await fetchData();
         alert('Task created from voice input!');
+        onRefresh();
       }
     } catch (err) {
       console.error('Error creating voice task:', err);
@@ -209,8 +209,8 @@ const Dashboard = ({ data = {}, onRefresh, isRefreshing = false, lastUpdated = n
           description: '',
         });
         setShowNewTaskForm(false);
-        await fetchData();
         alert('Task created successfully!');
+        onRefresh();
       }
     } catch (err) {
       console.error('Error creating task:', err);
@@ -246,36 +246,6 @@ const Dashboard = ({ data = {}, onRefresh, isRefreshing = false, lastUpdated = n
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex items-center justify-center">
-        <div className="text-center">
-          <RefreshCw className="w-8 h-8 animate-spin text-blue-500 mx-auto mb-2" />
-          <p className="text-gray-600">Loading your dashboard...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white p-4">
-        <div className="max-w-2xl mx-auto">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mt-4">
-            <AlertCircle className="w-5 h-5 text-red-500 inline mr-2" />
-            <p className="text-red-700">Error loading dashboard: {error}</p>
-          </div>
-          <button
-            onClick={handleRefresh}
-            className="mt-4 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
-          >
-            Try Again
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
