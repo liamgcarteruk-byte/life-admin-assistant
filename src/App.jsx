@@ -109,37 +109,26 @@ function App() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white pb-24">
       {/* Header (shared across all views) */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div className="max-w-2xl mx-auto px-4 py-4 flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Life Admin</h1>
-            <p className="text-sm text-gray-500">
-              {new Date().toLocaleDateString('en-US', {
-                weekday: 'long',
-                month: 'short',
-                day: 'numeric',
-              })}
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <button
-              onClick={handleRefresh}
-              disabled={isRefreshing}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-              title="Refresh"
-            >
-              <RefreshCw
-                className={`w-5 h-5 text-gray-600 ${isRefreshing ? 'animate-spin' : ''}`}
-              />
-            </button>
-            <button
-              onClick={handleLogout}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-600"
-              title="Logout"
-            >
-              <LogOut className="w-5 h-5" />
-            </button>
-          </div>
+      <div className="sticky top-0 z-10 relative">
+        <img src="/banner.svg" alt="Cartegraphy" className="w-full block" />
+        <div className="absolute right-4 top-1/2 -translate-y-1/2 flex gap-1">
+          <button
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+            title="Refresh"
+          >
+            <RefreshCw
+              className={`w-5 h-5 text-white/70 hover:text-white ${isRefreshing ? 'animate-spin' : ''}`}
+            />
+          </button>
+          <button
+            onClick={handleLogout}
+            className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+            title="Logout"
+          >
+            <LogOut className="w-5 h-5 text-white/70 hover:text-white" />
+          </button>
         </div>
       </div>
 

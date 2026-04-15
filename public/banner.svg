@@ -1,0 +1,77 @@
+<svg width="100%" viewBox="0 0 680 120" role="img" xmlns="http://www.w3.org/2000/svg">
+  <title>Cartegraphy app banner</title>
+  <desc>Dark navy banner with Union Jack colour compass rose and Cartegraphy wordmark</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+
+  <style>
+    .grid-line { stroke: #1E3050; stroke-width: 0.5; }
+    .meridian { stroke: #1E3050; stroke-width: 0.5; fill: none; }
+    .compass-ring { fill: none; stroke: #3A5880; stroke-width: 0.5; }
+    .compass-tick { stroke: #3A5880; stroke-width: 0.5; }
+    .wordmark { font-family: Georgia, 'Times New Roman', serif; font-size: 28px; font-weight: 400; fill: #F0F4FF; letter-spacing: 2px; }
+  </style>
+
+  <rect fill="#0A1628" width="680" height="120" rx="0"/>
+
+  <!-- Grid -->
+  <line class="grid-line" x1="0" y1="30" x2="680" y2="30"/>
+  <line class="grid-line" x1="0" y1="60" x2="680" y2="60"/>
+  <line class="grid-line" x1="0" y1="90" x2="680" y2="90"/>
+  <line class="grid-line" x1="80" y1="0" x2="80" y2="120"/>
+  <line class="grid-line" x1="200" y1="0" x2="200" y2="120"/>
+  <line class="grid-line" x1="320" y1="0" x2="320" y2="120"/>
+  <line class="grid-line" x1="440" y1="0" x2="440" y2="120"/>
+  <line class="grid-line" x1="560" y1="0" x2="560" y2="120"/>
+
+  <!-- Curved meridians -->
+  <path class="meridian" d="M 140 0 Q 160 60 140 120"/>
+  <path class="meridian" d="M 260 0 Q 285 60 260 120"/>
+
+  <!-- Compass rose -->
+  <g transform="translate(50, 60)">
+    <circle class="compass-ring" r="30"/>
+    <circle class="compass-ring" r="22" stroke-dasharray="2 4"/>
+    <circle class="compass-ring" r="14"/>
+
+    <!-- Cardinal ticks -->
+    <line class="compass-tick" x1="0" y1="-30" x2="0" y2="-24"/>
+    <line class="compass-tick" x1="0" y1="24" x2="0" y2="30"/>
+    <line class="compass-tick" x1="-30" y1="0" x2="-24" y2="0"/>
+    <line class="compass-tick" x1="24" y1="0" x2="30" y2="0"/>
+
+    <!-- Intercardinal ticks -->
+    <line class="compass-tick" x1="21.2" y1="-21.2" x2="17" y2="-17"/>
+    <line class="compass-tick" x1="21.2" y1="21.2" x2="17" y2="17"/>
+    <line class="compass-tick" x1="-21.2" y1="21.2" x2="-17" y2="17"/>
+    <line class="compass-tick" x1="-21.2" y1="-21.2" x2="-17" y2="-17"/>
+
+    <!-- N needle — white -->
+    <polygon fill="#FFFFFF" points="0,-22 4,0 0,4 -4,0"/>
+    <!-- S needle — red -->
+    <polygon fill="#C8102E" points="0,22 4,0 0,-4 -4,0"/>
+    <!-- E needle — red -->
+    <polygon fill="#C8102E" points="22,0 0,4 -4,0 0,-4"/>
+    <!-- W needle — white -->
+    <polygon fill="#FFFFFF" points="-22,0 0,-4 4,0 0,4"/>
+
+    <!-- Intercardinal diamonds -->
+    <polygon fill="#C8102E" points="0,-14 3,-9 0,-4 -3,-9"/>
+    <polygon fill="#FFFFFF" points="14,0 9,3 4,0 9,-3"/>
+    <polygon fill="#C8102E" points="0,14 3,9 0,4 -3,9"/>
+    <polygon fill="#FFFFFF" points="-14,0 -9,-3 -4,0 -9,3"/>
+
+    <!-- Centre dot -->
+    <circle fill="#F0F4FF" r="2.5"/>
+
+    <!-- N label -->
+    <text x="0" y="-34" text-anchor="middle" font-family="Georgia, serif" font-size="9" fill="#F0F4FF">N</text>
+  </g>
+
+  <!-- Wordmark -->
+  <text x="108" y="72" class="wordmark">Cartegraphy</text>
+
+</svg>
