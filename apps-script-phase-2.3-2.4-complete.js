@@ -186,7 +186,7 @@ function getDashboard() {
       subscriptions_renewing_soon: renewingSoon.length,
       unread_flagged_emails: emails.emails.filter(e => e.status !== "read").length
     },
-    tasks: pendingTasks.slice(0, 5),
+    tasks: pendingTasks,
     subscriptions: subscriptions.subscriptions,
     subscriptions_renewing: renewingSoon.slice(0, 3),
     recent_emails: emails.emails.slice(0, 3)
@@ -1084,4 +1084,3 @@ function mapRowToEmail(headers, row) {
   });
   return email;
 }
-                                                                                 
