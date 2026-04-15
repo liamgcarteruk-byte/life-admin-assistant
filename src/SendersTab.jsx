@@ -34,15 +34,7 @@ export default function SendersTab() {
     }
   };
 
-  const handleToggleSender = async (email, currentStatus) => {
-    // Cycle: pending → whitelist → blacklist → pending
-    const statusCycle = {
-      'pending': 'whitelist',
-      'whitelist': 'blacklist',
-      'blacklist': 'pending'
-    };
-    const newStatus = statusCycle[currentStatus] || 'whitelist';
-
+  const handleSetStatus = async (email, newStatus) => {
     try {
       const response = await fetch('/api/manage-sender', {
         method: 'POST',
@@ -134,22 +126,52 @@ export default function SendersTab() {
             : `No ${filter} senders`}
         </div>
       ) : (
-        <div className="space-y-1 max-h-96 overflow-y-auto">
+        <div className="space-y-2 max-h-96 overflow-y-auto">
           {filteredSenders.map(sender => (
-            <button
+            <div
               key={sender.email}
-              onClick={() => handleToggleSender(sender.email, sender.status)}
-              className={`w-full text-left px-3 py-2 rounded transition-colors ${getStatusBg(sender.status)}`}
+              className="w-full flex items-center justify-between px-3 py-2 bg-gray-50 rounded hover:bg-gray-100 transition-colors"
             >
-              <div className="flex items-center justify-between">
-                <span className="text-sm truncate font-mono">{sender.email}</span>
-                <span className={`text-xs font-medium whitespace-nowrap ml-2 ${getStatusColor(sender.status)}`}>
-                  {sender.status === 'whitelist' ? '✓ Whitelisted' : ''}
-                  {sender.status === 'blacklist' ? '✕ Blacklisted' : ''}
-                  {sender.status === 'pending' ? '? Pending' : ''}
-                </span>
+              <span className="text-sm truncate font-mono flex-1">{sender.email}</span>
+              <div className="flex gap-1 ml-2">
+                {/* Pending Button */}
+                <button
+                  onClick={() => handleSetStatus(sender.email, 'pending')}
+                  className={`w-7 h-7 rounded flex items-center justify-center text-xs transition-all ${
+                    sender.status === 'pending'
+                      ? 'bg-amber-100 text-amber-600 font-bold border border-amber-300'
+                      : 'bg-amber-50 text-amber-600 hover:bg-amber-100'
+                  }`}
+                  title="Mark as Pending"
+                >
+                  ?
+                </button>
+                {/* Whitelist Button */}
+                <button
+                  onClick={() => handleSetStatus(sender.email, 'whitelist')}
+                  className={`w-7 h-7 rounded flex items-center justify-center text-xs transition-all ${
+                    sender.status === 'whitelist'
+                      ? 'bg-green-100 text-green-600 font-bold border border-green-300'
+                      : 'bg-green-50 text-green-600 hover:bg-green-100'
+                  }`}
+                  title="Whitelist"
+                >
+                  ✓
+                </button>
+                {/* Blacklist Button */}
+                <button
+                  onClick={() => handleSetStatus(sender.email, 'blacklist')}
+                  className={`w-7 h-7 rounded flex items-center justify-center text-xs transition-all ${
+                    sender.status === 'blacklist'
+                      ? 'bg-red-100 text-red-600 font-bold border border-red-300'
+                      : 'bg-red-50 text-red-600 hover:bg-red-100'
+                  }`}
+                  title="Blacklist"
+                >
+                  ✕
+                </button>
               </div>
-            </button>
+            </div>
           ))}
         </div>
       )}
