@@ -17,7 +17,7 @@ export default async function handler(req, res) {
     }
 
     // Forward to Google Apps Script
-    const scriptUrl = process.env.VITE_APPS_SCRIPT_API;
+    const scriptUrl = 'https://script.google.com/macros/s/AKfycbyQ5tZz5So4exAfPrUS_OjZ9Q7nBQOdMh7gAazqOtIW1lcq2OmzKRwWDGUeEOnYWSj1IQ/exec';
     const response = await fetch(scriptUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
