@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { RefreshCw, AlertCircle, CheckCircle2, Clock, Plus, Mic, MicOff, Send, X } from 'lucide-react';
+import { RefreshCw, AlertCircle, CheckCircle2, Clock, Plus, Mic, MicOff, Send, X, ChevronDown } from 'lucide-react';
 const Dashboard = ({ data = {}, onRefresh, isRefreshing = false, lastUpdated = null }) => {
   // Local state for UI interactions only (not data fetching)
   const [showNewTaskForm, setShowNewTaskForm] = useState(false);
@@ -14,6 +14,16 @@ const Dashboard = ({ data = {}, onRefresh, isRefreshing = false, lastUpdated = n
 
   // NEW: State for handling task completion
   const [completingTaskId, setCompletingTaskId] = useState(null);
+
+  // State for expanded task descriptions
+  const [expandedTasks, setExpandedTasks] = useState(new Set());
+  const toggleExpand = (taskId) => {
+    setExpandedTasks((prev) => {
+      const next = new Set(prev);
+      next.has(taskId) ? next.delete(taskId) : next.add(taskId);
+      return next;
+    });
+  };
 
   // NEW: State for voice input (Session 1.5)
   const [isListening, setIsListening] = useState(false);
@@ -440,17 +450,18 @@ const Dashboard = ({ data = {}, onRefresh, isRefreshing = false, lastUpdated = n
               {tasks.map((task) => (
                 <div
                   key={task.task_id}
-                  className={`p-4 rounded-lg border-l-4 transition-colors ${
+                  className={`px-4 py-3 rounded-lg border-l-4 transition-colors ${
                     isOverdue(task)
                       ? 'bg-red-50 border-red-400'
                       : 'bg-white border-blue-400'
                   }`}
                 >
-                  <div className="flex items-start gap-3">
+                  {/* Inline row */}
+                  <div className="flex items-center gap-3">
                     <button
                       onClick={() => handleCompleteTask(task)}
                       disabled={completingTaskId === task.task_id}
-                      className="mt-1 flex-shrink-0 hover:opacity-70 transition-opacity"
+                      className="flex-shrink-0 hover:opacity-70 transition-opacity"
                       title="Mark task complete"
                     >
                       <div className="w-5 h-5 rounded border-2 border-blue-400 hover:bg-blue-50 flex items-center justify-center transition-colors">
@@ -460,28 +471,23 @@ const Dashboard = ({ data = {}, onRefresh, isRefreshing = false, lastUpdated = n
                       </div>
                     </button>
 
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <h3 className={`font-medium ${
-                          isOverdue(task) ? 'text-red-900' : 'text-gray-900'
-                        }`}>
-                          {task.title}
-                        </h3>
-                        {isOverdue(task) && (
-                          <span className="bg-red-100 text-red-700 text-xs px-2 py-1 rounded">
-                            OVERDUE
-                          </span>
-                        )}
-                      </div>
-                      {task.description && (
-                        <p className="text-sm text-gray-600 mt-1">{task.description}</p>
-                      )}
-                      <p className="text-sm text-gray-500 mt-1">{task.category}</p>
-                      <p className="text-xs text-gray-400 mt-1">
-                        Due: {formatDate(task.due_date)}
-                      </p>
-                    </div>
-                    <span className={`text-xs font-semibold px-2 py-1 rounded flex-shrink-0 ${
+                    <span className={`flex-1 font-medium text-sm ${
+                      isOverdue(task) ? 'text-red-900' : 'text-gray-900'
+                    }`}>
+                      {task.title}
+                    </span>
+
+                    {isOverdue(task) && (
+                      <span className="bg-red-100 text-red-700 text-xs px-2 py-0.5 rounded flex-shrink-0">
+                        OVERDUE
+                      </span>
+                    )}
+
+                    <span className="text-xs text-gray-400 flex-shrink-0">
+                      {formatDate(task.due_date)}
+                    </span>
+
+                    <span className={`text-xs font-semibold px-2 py-0.5 rounded flex-shrink-0 ${
                       task.priority === 'high'
                         ? 'bg-red-100 text-red-700'
                         : task.priority === 'medium'
@@ -490,7 +496,26 @@ const Dashboard = ({ data = {}, onRefresh, isRefreshing = false, lastUpdated = n
                     }`}>
                       {task.priority.toUpperCase()}
                     </span>
+
+                    {task.description && (
+                      <button
+                        onClick={() => toggleExpand(task.task_id)}
+                        className="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors"
+                        title={expandedTasks.has(task.task_id) ? 'Collapse' : 'Expand'}
+                      >
+                        <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${
+                          expandedTasks.has(task.task_id) ? 'rotate-180' : ''
+                        }`} />
+                      </button>
+                    )}
                   </div>
+
+                  {/* Expandable description */}
+                  {task.description && expandedTasks.has(task.task_id) && (
+                    <div className="mt-2 ml-8 text-sm text-gray-600 leading-relaxed">
+                      {task.description}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
