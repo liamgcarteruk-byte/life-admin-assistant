@@ -164,7 +164,7 @@ function getDashboard() {
       unread_flagged_emails: emails.emails.filter(e => e.status !== "read").length
     },
     tasks: pendingTasks,
-    subscriptions: subscriptions.subscriptions,
+    subscriptions: subscriptions.subscriptions.slice(0, 5),
     subscriptions_renewing: renewingSoon.slice(0, 3),
     recent_emails: emails.emails.slice(0, 3)
   };
