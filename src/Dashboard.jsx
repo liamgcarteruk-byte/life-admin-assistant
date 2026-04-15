@@ -474,40 +474,37 @@ const Dashboard = () => {
                   {data.tasks.map((task) => (
                     <div
                       key={task.task_id}
-                      className={`p-3 rounded-lg border flex items-center justify-between gap-3 ${
+                      className={`rounded-lg border flex items-center justify-between gap-3 overflow-hidden ${
                         isOverdue(task) ? 'bg-red-50 border-red-200' : 'bg-white border-gray-200'
                       }`}
                     >
-                      <div className="flex items-center gap-2 flex-1 min-w-0">
-                        <button
-                          onClick={() => handleCompleteTask(task)}
-                          disabled={completingTaskId === task.task_id}
-                          className="flex-shrink-0 p-1 hover:bg-gray-100 rounded transition-colors"
-                        >
-                          <CheckCircle2
-                            size={18}
-                            className={
-                              completingTaskId === task.task_id
-                                ? 'text-gray-400 animate-spin'
-                                : 'text-gray-400 hover:text-green-500'
-                            }
-                          />
-                        </button>
-                        <div className="flex items-baseline gap-2 min-w-0">
+                      <div className={`w-1 h-full ${getPriorityColor(task.priority)}`} />
+                      <div className="p-3 flex items-center justify-between gap-3 flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          <button
+                            onClick={() => handleCompleteTask(task)}
+                            disabled={completingTaskId === task.task_id}
+                            className="flex-shrink-0 p-1 hover:bg-gray-100 rounded transition-colors"
+                          >
+                            <CheckCircle2
+                              size={18}
+                              className={
+                                completingTaskId === task.task_id
+                                  ? 'text-gray-400 animate-spin'
+                                  : 'text-gray-400 hover:text-green-500'
+                              }
+                            />
+                          </button>
                           <h3 className="font-medium text-gray-900 text-sm truncate">{task.title}</h3>
-                          <div
-                            className={`w-2 h-2 rounded-full flex-shrink-0 ${getPriorityColor(task.priority)}`}
-                            title={`${task.priority} priority`}
-                          />
                         </div>
-                      </div>
-                      <div className="flex gap-4 text-xs text-gray-500 whitespace-nowrap flex-shrink-0">
-                        {task.created_at && <span>Added: {formatDate(task.created_at)}</span>}
-                        {task.due_date && (
-                          <span className={isOverdue(task) ? 'text-red-600 font-medium' : ''}>
-                            Due: {formatDate(task.due_date)}
-                          </span>
-                        )}
+                        <div className="flex gap-4 text-xs text-gray-500 whitespace-nowrap flex-shrink-0">
+                          {task.created_at && <span>Added: {formatDate(task.created_at)}</span>}
+                          {task.due_date && (
+                            <span className={isOverdue(task) ? 'text-red-600 font-medium' : ''}>
+                              Due: {formatDate(task.due_date)}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   ))}
