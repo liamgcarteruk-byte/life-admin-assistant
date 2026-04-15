@@ -602,7 +602,7 @@ Do NOT commit credentials to GitHub. If API key is exposed, rotate immediately a
   - **Status:** Code optimizations complete. Ready to test/deploy.
   - **Next:** Deploy updated apps-script-main.js to Google Apps Script editor and test with dailyEmailScan()
 
-- **Session 2.5 (April 15, 2026):** Email Sender Filtering & Management
+- **Session 2.5 (April 15, 2026):** Email Sender Filtering & Management - Code Complete
   - ✅ **Apps Script Updates:**
     - New `SendersList` sheet: tracks all senders with status (whitelist/blacklist/pending)
     - Gmail-level filtering: Blacklisted senders excluded from search query before fetch
@@ -610,18 +610,23 @@ Do NOT commit credentials to GitHub. If API key is exposed, rotate immediately a
     - Updated `dailyEmailScan()` to track new senders and return count
     - Updated `extractEmailsSinceLastRun()` to exclude blacklist from Gmail query
   - ✅ **Frontend Components:**
-    - `SendersTab.jsx` — Clean, minimalist UI for managing senders
+    - `SendersTab.jsx` — Clean, minimalist UI for managing senders (in `/src/SendersTab.jsx`)
     - Click-to-cycle: Pending → Whitelisted → Blacklisted → Pending
     - Filter tabs: All, Pending, Whitelisted, Blacklisted with counts
     - Sorted display: Pending senders first, then alphabetically
+    - Integrated into Dashboard.jsx with tab navigation ("Dashboard" / "Email Senders")
   - ✅ **API Endpoint:**
-    - `src/api/manage-sender.js` — POST endpoint for toggling sender status
+    - `api/manage-sender.js` — POST endpoint for toggling sender status (moved to root `/api/` folder)
     - Proxies through Vercel (CORS pattern)
-  - ✅ **Documentation:**
-    - `SENDER_FILTERING_SETUP.md` — Complete implementation & integration guide
-    - Step-by-step instructions for deployment, testing, troubleshooting
-  - **Status:** Code complete, awaiting user implementation & testing
-  - **Next:** Deploy Apps Script → Test sender tracking → Integrate dashboard tabs → End-to-end test
+  - ✅ **File Structure Fixed:**
+    - API files moved from `/src/api/` to root-level `/api/` for Vercel serverless compatibility
+    - Dashboard.jsx properly imports SendersTab and routes to tabs
+    - All imports and file paths verified correct
+  - ✅ **Vercel Deployment:**
+    - Git push completed with API file move
+    - Vercel auto-deployed updated code structure
+  - **Status:** ✅ COMPLETE - Code deployed, ready for testing & Apps Script deployment
+  - **Next:** User should deploy updated Apps Script code → Test sender tracking → Test status toggling
 
 ---
 
