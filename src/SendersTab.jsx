@@ -94,12 +94,6 @@ export default function SendersTab() {
 
   return (
     <div className="space-y-4 p-4">
-      {/* Header */}
-      <div>
-        <h2 className="text-xl font-semibold text-gray-900">Email Senders</h2>
-        <p className="text-sm text-gray-500">Click to cycle: Pending → Whitelisted → Blacklisted → Pending</p>
-      </div>
-
       {/* Filter Tabs */}
       <div className="flex gap-2 border-b border-gray-200">
         {['all', 'pending', 'whitelist', 'blacklist'].map(f => (
