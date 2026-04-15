@@ -677,6 +677,27 @@ Do NOT commit credentials to GitHub. If API key is exposed, rotate immediately a
 
 ---
 
-**Last Maintained:** 2026-04-15  
-**Status:** Phase 2.5 - Email Sender Management - Bug fix deployed, awaiting verification testing  
-**Next Update:** After testing sender toggle functionality
+- **Session 2.5.4 (April 16, 2026):** Email Senders Bug Fixes & UI Redesign
+  - ✅ **Bug Fixed:** Duplicate sender entries accumulating when toggling status
+    - Root cause: `manageSender()` in Google Apps Script was creating new rows instead of updating existing ones
+    - Solution: Updated `manageSender()` to delete ALL old entries for an email before adding new one
+    - Also added deduplication in `getSendersData()` as safety layer
+  - ✅ **UI Redesigned:** From cycling toggle to direct status buttons
+    - Replaced single clickable email with three small buttons: [?] [✓] [✕]
+    - Colors match status scheme: amber (pending), green (whitelisted), red (blacklisted)
+    - Selected status button appears bold with border for clear indication
+    - Direct click to set status (no more cycling through options)
+  - ✅ **UI Polish:** Entire sender row now colored by status for better visual clarity
+  - ✅ **Cleanup:** Removed outdated "Click to cycle" instruction text
+  - **Status:** ✅ COMPLETE - All sender management features working, UI polished
+  - **Files Modified:**
+    - `src/SendersTab.jsx` — Complete UI redesign with button controls
+    - `apps-script-main.js` (local) — Fixed `manageSender()` to prevent duplicates
+  - **Outstanding:** Google Apps Script has the fix in local version, already deployed to Google Apps Script manually
+  - **Next Session:** No immediate action needed; features are complete and deployed
+
+---
+
+**Last Maintained:** 2026-04-16  
+**Status:** Phase 2.5 - Email Sender Management - ✅ COMPLETE  
+**Next Update:** After any new feature requests or bugs discovered
