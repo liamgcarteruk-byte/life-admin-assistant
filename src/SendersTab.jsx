@@ -130,7 +130,7 @@ export default function SendersTab() {
           {filteredSenders.map(sender => (
             <div
               key={sender.email}
-              className="w-full flex items-center justify-between px-3 py-2 bg-gray-50 rounded hover:bg-gray-100 transition-colors"
+              className={`w-full flex items-center justify-between px-3 py-2 rounded transition-colors ${getStatusBg(sender.status)}`}
             >
               <span className="text-sm truncate font-mono flex-1">{sender.email}</span>
               <div className="flex gap-1 ml-2">
