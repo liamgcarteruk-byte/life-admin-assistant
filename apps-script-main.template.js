@@ -1,11 +1,10 @@
 // ============================================
 // LIFE ADMIN ASSISTANT - APPS SCRIPT
-// Phase 2.3: Email Scanner + Subscription Intelligence
+// Phase 2.4.4: Email Filtering + Action Suggestions
 // Updated: April 2026
 // ============================================
-// IMPORTANT: This is the source of truth for Apps Script code.
-// Copy the ENTIRE contents of this file into Google Apps Script editor.
-// Update this file when making changes to keep it synced with GitHub.
+// INSTRUCTIONS: This is the TEMPLATE version for GitHub (API key is placeholder).
+// Use apps-script-main.js (local only, not committed) with your actual API key.
 
 // ============ CONFIG (Update these!) ============
 const SHEET_ID = "1YSyZiHBfINbvOfoeBEHMwC1Gt4M0E8JVUj9AKj8aDjg";
