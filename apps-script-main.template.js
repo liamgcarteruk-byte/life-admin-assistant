@@ -344,13 +344,16 @@ Analyze these emails and for EACH ONE, respond with ONLY valid JSON in this form
     "is_spam": false,
     "summary": "one sentence summary of what this email is about",
     "reason_flagged": "Financial impact" or null,
-    "action_items": ["item1", "item2"],
+    "task_title": "Short action title (max 5 words, imperative verb, e.g. 'Add CityFibre calendar invite', 'Reply to HMRC letter')" or null,
+    "action_items": ["Full detail of what needs to be done"] or [],
     "sender_importance": "high",
     "topic": "Financial",
     "is_subscription": false,
     "confidence": 0.95
   }
 ]
+
+task_title rules: only populate if action_items is non-empty. Must be max 5 words. Start with an imperative verb. Be specific enough to identify the task at a glance. No punctuation.
 
 EMAILS TO ANALYZE:
 ${emailsForAnalysis}
@@ -487,21 +490,16 @@ function processEmailBatch(emailBatch, analyses) {
 
       if (analysis.action_items && analysis.action_items.length > 0) {
         const taskId = "T-" + String(tasksSheet.getLastRow()).padStart(5, "0");
+        const taskTitle = analysis.task_title || analysis.action_items[0].substring(0, 50);
+        const receivedDate = new Date(email.received_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+        const fullDetail = analysis.action_items.join("; ");
+        const taskDescription = `${fullDetail}\n\nFrom: "${email.subject}" · ${receivedDate}`;
         const taskRow = [
-          taskId,
-          `[EMAIL] ${email.subject}`,
-          analysis.action_items.join("; "),
-          "email",
-          analysis.topic,
-          "high",
-          "",
-          "pending",
-          emailId,
-          new Date(),
-          ""
+          taskId, taskTitle, taskDescription,
+          "email", analysis.topic, "high", "", "pending", emailId, new Date(), ""
         ];
         tasksSheet.appendRow(taskRow);
-        Logger.log(`Auto-created task for: ${email.subject}`);
+        Logger.log(`Auto-created task: ${taskTitle}`);
       }
 
       if (analysis.is_subscription) {
