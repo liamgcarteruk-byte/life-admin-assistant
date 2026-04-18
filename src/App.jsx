@@ -6,6 +6,7 @@ import SendersTab from './SendersTab';
 import BottomNav from './BottomNav';
 import Login from './Login';
 import { RefreshCw, AlertCircle, LogOut } from 'lucide-react';
+import CartegraphyLoader from './CartegraphyLoader';
 import './App.css';
 
 function App() {
@@ -57,15 +58,9 @@ function App() {
     }
   }, [user]);
 
-  // While checking if user is logged in, show a loading screen
+  // While checking if user is logged in, show the splash screen
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
+    return <CartegraphyLoader />;
   }
 
   // If user is not logged in, show Login
@@ -93,16 +88,9 @@ function App() {
     );
   }
 
-  // If loading initial data, show loading screen
+  // If loading initial data, show the splash screen
   if (appLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex items-center justify-center">
-        <div className="text-center">
-          <RefreshCw className="w-8 h-8 animate-spin text-blue-500 mx-auto mb-2" />
-          <p className="text-gray-600">Loading your dashboard...</p>
-        </div>
-      </div>
-    );
+    return <CartegraphyLoader />;
   }
 
   // Main app content with tabs
